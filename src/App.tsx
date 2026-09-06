@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { CommercialResult } from './components/CommercialResult'
 import { Header } from './components/Header'
 import { ManagerAnalysis } from './components/ManagerAnalysis'
+import { PatientsDialog } from './components/PatientsDialog'
 import { ProposalDialog } from './components/ProposalDialog'
 import { RiskSettingsDialog } from './components/RiskSettingsDialog'
 import { ScenarioComparison } from './components/ScenarioComparison'
@@ -20,7 +21,9 @@ function App() {
   const [view, setView] = useState<View>('commercial')
 
   const [patientName, setPatientName] = useState('')
+  const [patientPhone, setPatientPhone] = useState('')
   const [cpf, setCpf] = useState('')
+  const [patientsOpen, setPatientsOpen] = useState(false)
 
   const [treatments, setTreatments] = useState(() => loadTreatments())
   const [riskSettings, setRiskSettings] = useState(() => loadRiskSettings())
@@ -110,6 +113,8 @@ function App() {
             view={view}
             patientName={patientName}
             onPatientNameChange={setPatientName}
+            patientPhone={patientPhone}
+            onPatientPhoneChange={setPatientPhone}
             cpf={cpf}
             onCpfChange={setCpf}
             treatments={treatments}
@@ -144,7 +149,12 @@ function App() {
           />
 
           {view === 'manager' && canCompute && outcome.feasible && (
-            <ManagerAnalysis outcome={outcome} directCost={directCost} downPayment={downPayment} />
+            <ManagerAnalysis
+              outcome={outcome}
+              directCost={directCost}
+              downPayment={downPayment}
+              onOpenPatients={() => setPatientsOpen(true)}
+            />
           )}
 
           <ScenarioComparison scenarios={scenarios} view={view} onClear={() => setScenarios([])} />
@@ -177,6 +187,8 @@ function App() {
         settings={riskSettings}
         onChange={handleChangeRiskSettings}
       />
+
+      <PatientsDialog open={patientsOpen} onClose={() => setPatientsOpen(false)} />
     </div>
   )
 }

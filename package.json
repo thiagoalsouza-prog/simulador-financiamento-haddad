@@ -8,11 +8,15 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "start": "node server/index.js",
+    "server:dev": "node server/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "express": "^4.21.2",
     "lucide-react": "^1.41.0",
+    "pg": "^8.13.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
@@ -33,5 +37,8 @@
     "typescript": "~6.0.2",
     "vite": "^6.4.3",
     "vitest": "^3.2.7"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
   }
 }

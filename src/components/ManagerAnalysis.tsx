@@ -1,4 +1,4 @@
-import { AlertCircle, ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react'
+import { AlertCircle, ShieldCheck, ShieldAlert, ShieldQuestion, Users } from 'lucide-react'
 import type { SimulationOutcome } from '../finance/types'
 import { formatCurrency } from '../utils/currency'
 import { formatPercent } from '../utils/numbers'
@@ -11,6 +11,7 @@ interface ManagerAnalysisProps {
   outcome: SimulationOutcome
   directCost: number
   downPayment: number
+  onOpenPatients: () => void
 }
 
 const RISK_LABEL = {
@@ -25,7 +26,7 @@ const RISK_STYLE = {
   high: { bg: 'bg-[#fbeaea]', text: 'text-danger', border: 'border-danger/30', Icon: ShieldAlert },
 } as const
 
-export function ManagerAnalysis({ outcome, directCost, downPayment }: ManagerAnalysisProps) {
+export function ManagerAnalysis({ outcome, directCost, downPayment, onOpenPatients }: ManagerAnalysisProps) {
   const {
     managerialResult,
     marginPct,
@@ -53,11 +54,21 @@ export function ManagerAnalysis({ outcome, directCost, downPayment }: ManagerAna
 
   return (
     <div className="flex flex-col gap-6 rounded-2xl border border-border bg-surface p-5 shadow-soft sm:p-6">
-      <div>
-        <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted">
-          Área gerencial
-        </h2>
-        <p className="mt-1 text-xs text-muted">Informações internas — não aparecem na proposta.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted">
+            Área gerencial
+          </h2>
+          <p className="mt-1 text-xs text-muted">Informações internas — não aparecem na proposta.</p>
+        </div>
+        <button
+          type="button"
+          onClick={onOpenPatients}
+          className="flex min-h-9 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
+        >
+          <Users size={14} />
+          Pacientes salvos
+        </button>
       </div>
 
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">

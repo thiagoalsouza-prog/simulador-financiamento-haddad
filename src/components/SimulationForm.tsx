@@ -1,15 +1,23 @@
+import { Check, Loader2, UserPlus } from 'lucide-react'
+import { useState } from 'react'
+import { savePatient } from '../api/patients'
 import type { SimulationMode, Treatment } from '../finance/types'
 import type { ValidationErrors } from '../finance/validate'
 import type { View } from '../types'
 import { maskCpf, sanitizeCpfInput } from '../utils/cpf'
+import { isValidPhone, maskPhone, sanitizePhoneInput } from '../utils/phone'
 import { FormField } from './FormField'
 import { MoneyInput } from './MoneyInput'
 import { PercentInput } from './PercentInput'
+
+type SaveStatus = 'idle' | 'saving' | 'success' | 'error'
 
 interface SimulationFormProps {
   view: View
   patientName: string
   onPatientNameChange: (value: string) => void
+  patientPhone: string
+  onPatientPhoneChange: (value: string) => void
   cpf: string
   onCpfChange: (value: string) => void
   treatments: Treatment[]
@@ -37,6 +45,8 @@ export function SimulationForm({
   view,
   patientName,
   onPatientNameChange,
+  patientPhone,
+  onPatientPhoneChange,
   cpf,
   onCpfChange,
   treatments,
@@ -59,6 +69,29 @@ export function SimulationForm({
   errors,
   infeasibleMessage,
 }: SimulationFormProps) {
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const [saveError, setSaveError] = useState<string | undefined>()
+
+  async function handleSavePatient() {
+    if (!patientName.trim() || !isValidPhone(patientPhone)) {
+      setSaveStatus('error')
+      setSaveError('Informe nome completo e um telefone válido com DDD.')
+      return
+    }
+
+    setSaveStatus('saving')
+    setSaveError(undefined)
+
+    try {
+      await savePatient(patientName.trim(), patientPhone)
+      setSaveStatus('success')
+      setTimeout(() => setSaveStatus('idle'), 2500)
+    } catch (err) {
+      setSaveStatus('error')
+      setSaveError(err instanceof Error ? err.message : 'Não foi possível salvar o paciente.')
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6 rounded-2xl border border-border bg-surface p-5 shadow-soft sm:p-6">
       <section className="flex flex-col gap-4">
@@ -81,6 +114,22 @@ export function SimulationForm({
           )}
         </FormField>
 
+        <FormField label="Telefone">
+          {({ inputId, describedBy }) => (
+            <input
+              id={inputId}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="(00) 00000-0000"
+              value={maskPhone(patientPhone)}
+              aria-describedby={describedBy}
+              onChange={(e) => onPatientPhoneChange(sanitizePhoneInput(e.target.value))}
+              className="min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary"
+            />
+          )}
+        </FormField>
+
         <FormField label="CPF (opcional)">
           {({ inputId, describedBy }) => (
             <input
@@ -97,9 +146,32 @@ export function SimulationForm({
           )}
         </FormField>
 
+        <button
+          type="button"
+          onClick={handleSavePatient}
+          disabled={saveStatus === 'saving'}
+          className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {saveStatus === 'saving' ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : saveStatus === 'success' ? (
+            <Check size={16} className="text-success" />
+          ) : (
+            <UserPlus size={16} />
+          )}
+          {saveStatus === 'success' ? 'Paciente salvo ✓' : 'Salvar paciente'}
+        </button>
+
+        {saveStatus === 'error' && saveError && (
+          <p role="alert" className="text-xs font-medium text-danger">
+            {saveError}
+          </p>
+        )}
+
         <p className="text-xs text-muted">
-          Nome e CPF são usados somente durante esta consulta. Não ficam gravados e o CPF nunca
-          aparece na proposta.
+          O CPF nunca é salvo nem aparece na proposta. Nome e telefone só são gravados no banco de
+          dados quando você clica em "Salvar paciente" — a busca fica disponível na área
+          gerencial.
         </p>
       </section>
 
