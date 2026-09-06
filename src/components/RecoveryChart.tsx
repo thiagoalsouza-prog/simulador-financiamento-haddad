@@ -15,7 +15,7 @@ const PAD_TOP = 28
 const PAD_BOTTOM = 32
 
 export function RecoveryChart({ outcome, directCost, downPayment }: RecoveryChartProps) {
-  const { schedule, costRecovery } = outcome
+  const { schedule, costRecovery, principal, principalRecovery } = outcome
 
   const cumulative: number[] = [downPayment]
   let acc = downPayment
@@ -24,7 +24,7 @@ export function RecoveryChart({ outcome, directCost, downPayment }: RecoveryChar
     cumulative.push(acc)
   }
 
-  const maxValue = Math.max(...cumulative, directCost) * 1.08 || 1
+  const maxValue = Math.max(...cumulative, directCost, principal) * 1.08 || 1
   const innerWidth = WIDTH - PAD_LEFT - PAD_RIGHT
   const innerHeight = HEIGHT - PAD_TOP - PAD_BOTTOM
   const n = cumulative.length - 1
@@ -40,13 +40,21 @@ export function RecoveryChart({ outcome, directCost, downPayment }: RecoveryChar
   const recoveryX = recoveryIndex !== null ? xFor(recoveryIndex) : null
   const recoveryY = recoveryIndex !== null ? yFor(cumulative[recoveryIndex]) : null
 
-  const description = costRecovery.covered
-    ? `Gráfico mostrando o recebimento acumulado desde a entrada até a última parcela. O custo de ${formatCurrency(
-        directCost,
-      )} é atingido na ${costRecovery.installment === 0 ? 'entrada' : `${costRecovery.installment}ª parcela`}.`
-    : `Gráfico mostrando o recebimento acumulado desde a entrada até a última parcela. O custo de ${formatCurrency(
-        directCost,
-      )} não é atingido dentro do prazo simulado.`
+  const principalY = yFor(principal)
+  const principalRecoveryIndex = principalRecovery.covered ? principalRecovery.installment ?? 0 : null
+  const principalRecoveryX = principalRecoveryIndex !== null ? xFor(principalRecoveryIndex) : null
+  const principalRecoveryY =
+    principalRecoveryIndex !== null ? yFor(cumulative[principalRecoveryIndex]) : null
+
+  const description = [
+    'Gráfico mostrando o recebimento acumulado desde a entrada até a última parcela.',
+    costRecovery.covered
+      ? `O custo de ${formatCurrency(directCost)} é atingido na ${costRecovery.installment === 0 ? 'entrada' : `${costRecovery.installment}ª parcela`}.`
+      : `O custo de ${formatCurrency(directCost)} não é atingido dentro do prazo simulado.`,
+    principalRecovery.covered
+      ? `O valor principal de ${formatCurrency(principal)} é atingido na ${principalRecovery.installment === 0 ? 'entrada' : `${principalRecovery.installment}ª parcela`}.`
+      : `O valor principal de ${formatCurrency(principal)} não é atingido dentro do prazo simulado.`,
+  ].join(' ')
 
   return (
     <figure className="m-0">
@@ -56,7 +64,7 @@ export function RecoveryChart({ outcome, directCost, downPayment }: RecoveryChar
         aria-labelledby="recovery-chart-title recovery-chart-desc"
         className="w-full"
       >
-        <title id="recovery-chart-title">Recuperação do custo ao longo das parcelas</title>
+        <title id="recovery-chart-title">Recuperação do custo e do valor principal ao longo das parcelas</title>
         <desc id="recovery-chart-desc">{description}</desc>
 
         <defs>
@@ -79,6 +87,19 @@ export function RecoveryChart({ outcome, directCost, downPayment }: RecoveryChar
           Custo: {formatCurrency(directCost)}
         </text>
 
+        <line
+          x1={PAD_LEFT}
+          y1={principalY}
+          x2={WIDTH - PAD_RIGHT}
+          y2={principalY}
+          stroke="var(--warning)"
+          strokeWidth={1.5}
+          strokeDasharray="6 4"
+        />
+        <text x={WIDTH - PAD_RIGHT} y={principalY - 6} textAnchor="end" fontSize="11" fill="var(--warning)">
+          Valor principal: {formatCurrency(principal)}
+        </text>
+
         <polygon points={areaPoints} fill="url(#recoveryFill)" />
         <polyline
           points={linePoints}
@@ -95,16 +116,39 @@ export function RecoveryChart({ outcome, directCost, downPayment }: RecoveryChar
 
         {recoveryX !== null && recoveryY !== null && (
           <g>
-            <circle cx={recoveryX} cy={recoveryY} r={6} fill="var(--surface)" stroke="var(--success)" strokeWidth={3} />
+            <circle cx={recoveryX} cy={recoveryY} r={6} fill="var(--surface)" stroke="var(--danger)" strokeWidth={3} />
             <text
               x={Math.min(Math.max(recoveryX, PAD_LEFT + 40), WIDTH - PAD_RIGHT - 40)}
               y={Math.max(recoveryY - 14, 14)}
               textAnchor="middle"
               fontSize="11"
               fontWeight={700}
-              fill="var(--success)"
+              fill="var(--danger)"
             >
               {recoveryIndex === 0 ? 'ENTRADA' : `${recoveryIndex}ª PARCELA`}
+            </text>
+          </g>
+        )}
+
+        {principalRecoveryX !== null && principalRecoveryY !== null && (
+          <g>
+            <circle
+              cx={principalRecoveryX}
+              cy={principalRecoveryY}
+              r={6}
+              fill="var(--surface)"
+              stroke="var(--warning)"
+              strokeWidth={3}
+            />
+            <text
+              x={Math.min(Math.max(principalRecoveryX, PAD_LEFT + 40), WIDTH - PAD_RIGHT - 40)}
+              y={Math.max(principalRecoveryY - 14, 14)}
+              textAnchor="middle"
+              fontSize="11"
+              fontWeight={700}
+              fill="var(--warning)"
+            >
+              {principalRecoveryIndex === 0 ? 'ENTRADA' : `${principalRecoveryIndex}ª PARCELA`}
             </text>
           </g>
         )}
@@ -132,6 +176,10 @@ export function RecoveryChart({ outcome, directCost, downPayment }: RecoveryChar
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-4 border-t-2 border-dashed border-danger" aria-hidden="true" />
           Custo
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-2.5 w-4 border-t-2 border-dashed border-warning" aria-hidden="true" />
+          Valor principal
         </span>
       </figcaption>
     </figure>
