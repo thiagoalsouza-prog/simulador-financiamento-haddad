@@ -3,7 +3,7 @@ import type { SimulationOutcome } from '../finance/types'
 import { formatCurrency } from '../utils/currency'
 import { formatPercent } from '../utils/numbers'
 import { AmortizationTable } from './AmortizationTable'
-import { CostRecoveryBanner } from './CostRecoveryBanner'
+import { RecoveryBanner } from './RecoveryBanner'
 import { RecoveryChart } from './RecoveryChart'
 import { Timeline } from './Timeline'
 
@@ -26,8 +26,16 @@ const RISK_STYLE = {
 } as const
 
 export function ManagerAnalysis({ outcome, directCost, downPayment }: ManagerAnalysisProps) {
-  const { managerialResult, marginPct, risk, amountMissingAfterDownPayment, costRecovery, installmentsCount } =
-    outcome
+  const {
+    managerialResult,
+    marginPct,
+    risk,
+    amountMissingAfterDownPayment,
+    costRecovery,
+    principalRecovery,
+    principal,
+    installmentsCount,
+  } = outcome
 
   const resultTone = managerialResult > 0 ? 'success' : managerialResult < 0 ? 'danger' : 'muted'
   const resultText =
@@ -97,7 +105,27 @@ export function ManagerAnalysis({ outcome, directCost, downPayment }: ManagerAna
 
       <p className="text-sm text-muted">{resultText}</p>
 
-      <CostRecoveryBanner outcome={outcome} directCost={directCost} downPayment={downPayment} />
+      <RecoveryBanner
+        recovery={costRecovery}
+        target={directCost}
+        downPayment={downPayment}
+        label="Recuperação do custo"
+        targetNoun="custo"
+        targetNounUpper="CUSTO"
+        notCoveredTitle="ATENÇÃO: OPERAÇÃO EM PREJUÍZO"
+        notCoveredSubtitle="O RECEBIMENTO NÃO COBRE O CUSTO"
+      />
+
+      <RecoveryBanner
+        recovery={principalRecovery}
+        target={principal}
+        downPayment={downPayment}
+        label="Recuperação do valor principal"
+        targetNoun="valor principal"
+        targetNounUpper="VALOR PRINCIPAL"
+        notCoveredTitle="ATENÇÃO: SALDO FINANCIADO NÃO RECUPERADO"
+        notCoveredSubtitle="O RECEBIMENTO NÃO COBRE O VALOR PRINCIPAL"
+      />
 
       <div>
         <h3 className="mb-3 font-heading text-sm font-bold text-text">Gráfico de recuperação</h3>

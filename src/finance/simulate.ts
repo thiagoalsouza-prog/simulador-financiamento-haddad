@@ -18,6 +18,7 @@ function emptySchedule(): SimulationOutcome {
     totalReceived: 0,
     creditCost: 0,
     costRecovery: { covered: false, installment: null, receivedAtRecovery: 0 },
+    principalRecovery: { covered: false, installment: null, receivedAtRecovery: 0 },
     amountMissingAfterDownPayment: 0,
     managerialResult: 0,
     marginPct: 0,
@@ -69,6 +70,7 @@ export function runSimulation(params: SimulationParams, riskSettings: RiskSettin
   const totalReceived = downPayment + totalInstallments
   const creditCost = totalInstallments - principal
   const costRecovery = findNominalCostRecovery(directCost, downPayment, schedule)
+  const principalRecovery = findNominalCostRecovery(principal, downPayment, schedule)
   const amountMissingAfterDownPayment = Math.max(0, directCost - downPayment)
   const managerialResult = totalReceived - directCost
   const marginPct = totalReceived === 0 ? 0 : (managerialResult / totalReceived) * 100
@@ -90,6 +92,7 @@ export function runSimulation(params: SimulationParams, riskSettings: RiskSettin
     totalReceived,
     creditCost,
     costRecovery,
+    principalRecovery,
     amountMissingAfterDownPayment,
     managerialResult,
     marginPct,

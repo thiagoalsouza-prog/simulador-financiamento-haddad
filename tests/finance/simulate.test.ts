@@ -27,6 +27,8 @@ describe('runSimulation', () => {
     expect(outcome.installmentValue).toBeCloseTo(932.547142, 4)
     expect(outcome.costRecovery.covered).toBe(true)
     expect(outcome.costRecovery.installment).toBe(4)
+    expect(outcome.principalRecovery.covered).toBe(true)
+    expect(outcome.principalRecovery.installment).toBe(11)
     expect(outcome.managerialResult).toBeGreaterThan(0)
     expect(outcome.risk.level).toBe('healthy')
   })

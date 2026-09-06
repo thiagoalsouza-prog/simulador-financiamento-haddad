@@ -66,6 +66,7 @@ export interface SimulationOutcome {
   totalReceived: number
   creditCost: number
   costRecovery: CostRecoveryResult
+  principalRecovery: CostRecoveryResult
   amountMissingAfterDownPayment: number
   managerialResult: number
   marginPct: number
