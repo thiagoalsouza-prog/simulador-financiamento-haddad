@@ -1,11 +1,12 @@
 # Simulador de Financiamento — Clínica Haddad
 
-Aplicação web (React + TypeScript + Vite no front-end, Express + PostgreSQL no
-back-end) usada pela equipe da Clínica Haddad durante negociações de
-tratamentos odontológicos. Calcula financiamento pelo Sistema Price, mostra em
-qual parcela o custo direto e o valor principal são recuperados, separa a
-visão comercial da área gerencial, gera propostas comerciais para WhatsApp e
-permite salvar nome + telefone de pacientes para consulta posterior.
+Aplicação web (React + TypeScript + Vite no front-end, serverless functions +
+PostgreSQL no back-end, hospedada na Vercel) usada pela equipe da Clínica
+Haddad durante negociações de tratamentos odontológicos. Calcula financiamento
+pelo Sistema Price, mostra em qual parcela o custo direto e o valor principal
+são recuperados, separa a visão comercial da área gerencial, gera propostas
+comerciais para WhatsApp e permite salvar nome + telefone de pacientes para
+consulta posterior.
 
 Não possui login. Tratamentos cadastrados e parâmetros de risco ficam salvos
 em `localStorage` (por navegador); CPF nunca é salvo em lugar nenhum; nome e
@@ -15,8 +16,8 @@ explicitamente em "Salvar paciente".
 ## Estrutura do projeto
 
 ```
-server/
-  index.js          Servidor Express: serve o front-end (dist/) e a API /api/patients
+api/
+  patients.js       Serverless function (Vercel): POST salva, GET busca pacientes
 src/
   api/              Cliente HTTP para a API de pacientes
   components/       Componentes visuais (formulário, resultados, diálogos, gráfico)
@@ -34,9 +35,11 @@ tests/
 ## Banco de dados
 
 A tabela `pacientes_simulador` (nome, telefone, data) é criada automaticamente
-pelo servidor na primeira inicialização (`CREATE TABLE IF NOT EXISTS`). Basta
-apontar a variável de ambiente `DATABASE_URL` para um banco Postgres (Neon ou
-outro) — não é necessário rodar migrations manualmente.
+pela função serverless na primeira chamada (`CREATE TABLE IF NOT EXISTS`).
+Basta apontar a variável de ambiente `DATABASE_URL` para um banco Postgres
+Neon — não é necessário rodar migrations manualmente. A leitura usa
+`@neondatabase/serverless`, recomendado pela própria Neon para ambientes
+serverless (evita esgotar conexões TCP a cada invocação).
 
 ## Instalação
 
@@ -46,19 +49,21 @@ npm install
 
 ## Desenvolvimento local
 
-Rodar o front-end com hot reload:
+Front-end apenas (sem API):
 
 ```bash
 npm run dev
 ```
 
-Abre em `http://localhost:5173`. Chamadas para `/api/*` são redirecionadas
-(proxy do Vite) para `http://localhost:8787` — rode o backend nesse endereço
-em outro terminal:
+Abre em `http://localhost:5173`. Para testar também as rotas `/api/*`
+localmente, use a CLI da Vercel (emula front-end + funções serverless juntos):
 
 ```bash
-DATABASE_URL="postgresql://usuario:senha@host/banco" npm run server:dev
+npx vercel dev
 ```
+
+Configure `DATABASE_URL` no arquivo `.env.local` (não versionado) antes de
+rodar.
 
 ## Testes
 
@@ -69,15 +74,12 @@ npm test
 Executa a suíte completa (Vitest + React Testing Library) uma vez. Use
 `npm run test:watch` para modo interativo.
 
-## Build e execução em produção
+## Deploy
 
-```bash
-npm run build
-DATABASE_URL="postgresql://usuario:senha@host/banco" npm run start
-```
-
-`npm run build` gera a pasta `dist/`; `npm run start` sobe o servidor Express
-que serve esses arquivos estáticos e expõe a API em `/api/patients`.
+Hospedado na Vercel (plano gratuito, sem cartão de crédito). O deploy é
+automático a cada push na branch `main` conectada ao projeto na Vercel.
+Configuração necessária no dashboard da Vercel: variável de ambiente
+`DATABASE_URL` apontando para o banco Neon.
 
 ## Notas de segurança e privacidade
 
