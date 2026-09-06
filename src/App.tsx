@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
+import type { SimulationSnapshot } from './api/patients'
 import { CommercialResult } from './components/CommercialResult'
 import { Header } from './components/Header'
 import { ManagerAnalysis } from './components/ManagerAnalysis'
-import { PatientsDialog } from './components/PatientsDialog'
+import { PatientsPage } from './components/PatientsPage'
 import { ProposalDialog } from './components/ProposalDialog'
 import { RiskSettingsDialog } from './components/RiskSettingsDialog'
 import { ScenarioComparison } from './components/ScenarioComparison'
@@ -19,11 +20,11 @@ const MAX_SCENARIOS = 3
 
 function App() {
   const [view, setView] = useState<View>('commercial')
+  const [showPatientsPage, setShowPatientsPage] = useState(false)
 
   const [patientName, setPatientName] = useState('')
   const [patientPhone, setPatientPhone] = useState('')
   const [cpf, setCpf] = useState('')
-  const [patientsOpen, setPatientsOpen] = useState(false)
 
   const [treatments, setTreatments] = useState(() => loadTreatments())
   const [riskSettings, setRiskSettings] = useState(() => loadRiskSettings())
@@ -60,6 +61,27 @@ function App() {
   const canCompute = Object.keys(errors).length === 0
 
   const outcome = useMemo(() => runSimulation(params, riskSettings), [params, riskSettings])
+
+  const treatmentName = treatments.find((t) => t.id === treatmentId)?.name ?? 'Personalizado'
+
+  const simulationSnapshot: SimulationSnapshot | null = useMemo(() => {
+    if (!canCompute || !outcome.feasible) return null
+    return {
+      tratamentoNome: treatmentName,
+      valorTratamento: treatmentValue,
+      entrada: downPayment,
+      jurosMensalPct: monthlyRatePct,
+      modo: mode,
+      parcelas: outcome.installmentsCount,
+      valorParcela: outcome.installmentValue,
+      totalReceber: outcome.totalReceived,
+    }
+  }, [canCompute, outcome, treatmentName, treatmentValue, downPayment, monthlyRatePct, mode])
+
+  function handleChangeView(next: View) {
+    setView(next)
+    setShowPatientsPage(false)
+  }
 
   function handleSelectTreatment(id: string) {
     setTreatmentId(id)
@@ -102,64 +124,69 @@ function App() {
     <div className="min-h-screen bg-background pb-16">
       <Header
         view={view}
-        onChangeView={setView}
+        onChangeView={handleChangeView}
         onOpenTreatments={() => setTreatmentsOpen(true)}
         onOpenRiskSettings={() => setRiskSettingsOpen(true)}
       />
 
-      <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start">
-        <div className="lg:sticky lg:top-24 lg:w-[380px] lg:shrink-0">
-          <SimulationForm
-            view={view}
-            patientName={patientName}
-            onPatientNameChange={setPatientName}
-            patientPhone={patientPhone}
-            onPatientPhoneChange={setPatientPhone}
-            cpf={cpf}
-            onCpfChange={setCpf}
-            treatments={treatments}
-            treatmentId={treatmentId}
-            onSelectTreatment={handleSelectTreatment}
-            treatmentValue={treatmentValue}
-            onTreatmentValueChange={setTreatmentValue}
-            directCost={directCost}
-            onDirectCostChange={setDirectCost}
-            downPayment={downPayment}
-            onDownPaymentChange={setDownPayment}
-            monthlyRatePct={monthlyRatePct}
-            onMonthlyRateChange={setMonthlyRatePct}
-            mode={mode}
-            onModeChange={setMode}
-            installments={installments}
-            onInstallmentsChange={setInstallments}
-            maxInstallment={maxInstallment}
-            onMaxInstallmentChange={setMaxInstallment}
-            errors={errors}
-            infeasibleMessage={mode === 'byInstallment' ? outcome.infeasibleMessage : undefined}
-          />
-        </div>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <CommercialResult
-            outcome={outcome}
-            downPayment={downPayment}
-            canCompute={canCompute}
-            onGenerateProposal={() => setProposalOpen(true)}
-            onCompareScenario={handleAddScenario}
-          />
-
-          {view === 'manager' && canCompute && outcome.feasible && (
-            <ManagerAnalysis
-              outcome={outcome}
+      {showPatientsPage ? (
+        <PatientsPage onBack={() => setShowPatientsPage(false)} />
+      ) : (
+        <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start">
+          <div className="lg:sticky lg:top-24 lg:w-[380px] lg:shrink-0">
+            <SimulationForm
+              view={view}
+              patientName={patientName}
+              onPatientNameChange={setPatientName}
+              patientPhone={patientPhone}
+              onPatientPhoneChange={setPatientPhone}
+              cpf={cpf}
+              onCpfChange={setCpf}
+              treatments={treatments}
+              treatmentId={treatmentId}
+              onSelectTreatment={handleSelectTreatment}
+              treatmentValue={treatmentValue}
+              onTreatmentValueChange={setTreatmentValue}
               directCost={directCost}
+              onDirectCostChange={setDirectCost}
               downPayment={downPayment}
-              onOpenPatients={() => setPatientsOpen(true)}
+              onDownPaymentChange={setDownPayment}
+              monthlyRatePct={monthlyRatePct}
+              onMonthlyRateChange={setMonthlyRatePct}
+              mode={mode}
+              onModeChange={setMode}
+              installments={installments}
+              onInstallmentsChange={setInstallments}
+              maxInstallment={maxInstallment}
+              onMaxInstallmentChange={setMaxInstallment}
+              errors={errors}
+              infeasibleMessage={mode === 'byInstallment' ? outcome.infeasibleMessage : undefined}
+              simulationSnapshot={simulationSnapshot}
             />
-          )}
+          </div>
 
-          <ScenarioComparison scenarios={scenarios} view={view} onClear={() => setScenarios([])} />
-        </div>
-      </main>
+          <div className="flex min-w-0 flex-1 flex-col gap-6">
+            <CommercialResult
+              outcome={outcome}
+              downPayment={downPayment}
+              canCompute={canCompute}
+              onGenerateProposal={() => setProposalOpen(true)}
+              onCompareScenario={handleAddScenario}
+            />
+
+            {view === 'manager' && canCompute && outcome.feasible && (
+              <ManagerAnalysis
+                outcome={outcome}
+                directCost={directCost}
+                downPayment={downPayment}
+                onOpenPatients={() => setShowPatientsPage(true)}
+              />
+            )}
+
+            <ScenarioComparison scenarios={scenarios} view={view} onClear={() => setScenarios([])} />
+          </div>
+        </main>
+      )}
 
       <ProposalDialog
         open={proposalOpen}
@@ -187,8 +214,6 @@ function App() {
         settings={riskSettings}
         onChange={handleChangeRiskSettings}
       />
-
-      <PatientsDialog open={patientsOpen} onClose={() => setPatientsOpen(false)} />
     </div>
   )
 }

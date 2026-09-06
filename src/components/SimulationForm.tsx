@@ -1,6 +1,6 @@
 import { Check, Loader2, UserPlus } from 'lucide-react'
 import { useState } from 'react'
-import { savePatient } from '../api/patients'
+import { savePatient, type SimulationSnapshot } from '../api/patients'
 import type { SimulationMode, Treatment } from '../finance/types'
 import type { ValidationErrors } from '../finance/validate'
 import type { View } from '../types'
@@ -39,6 +39,7 @@ interface SimulationFormProps {
   onMaxInstallmentChange: (value: number) => void
   errors: ValidationErrors
   infeasibleMessage?: string
+  simulationSnapshot: SimulationSnapshot | null
 }
 
 export function SimulationForm({
@@ -68,6 +69,7 @@ export function SimulationForm({
   onMaxInstallmentChange,
   errors,
   infeasibleMessage,
+  simulationSnapshot,
 }: SimulationFormProps) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [saveError, setSaveError] = useState<string | undefined>()
@@ -83,7 +85,7 @@ export function SimulationForm({
     setSaveError(undefined)
 
     try {
-      await savePatient(patientName.trim(), patientPhone)
+      await savePatient(patientName.trim(), patientPhone, simulationSnapshot)
       setSaveStatus('success')
       setTimeout(() => setSaveStatus('idle'), 2500)
     } catch (err) {
@@ -169,8 +171,9 @@ export function SimulationForm({
         )}
 
         <p className="text-xs text-muted">
-          O CPF nunca é salvo nem aparece na proposta. Nome e telefone só são gravados no banco de
-          dados quando você clica em "Salvar paciente" — a busca fica disponível na área
+          O CPF nunca é salvo nem aparece na proposta. Nome, telefone e a simulação atual só são
+          gravados no banco de dados quando você clica em "Salvar paciente" — um novo salvamento
+          substitui a simulação anterior do mesmo paciente. A busca fica disponível na área
           gerencial.
         </p>
       </section>
