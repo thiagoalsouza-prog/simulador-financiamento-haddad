@@ -83,6 +83,47 @@ export function RiskSettingsDialog({ open, onClose, settings, onChange }: RiskSe
           )}
         </FormField>
 
+        <hr className="border-border" />
+
+        <div>
+          <h3 className="font-heading text-sm font-bold uppercase tracking-wide text-muted">
+            Valores padrão do simulador
+          </h3>
+          <p className="mt-1 text-xs text-muted">
+            Usados para preencher uma nova simulação ao abrir o sistema.
+          </p>
+        </div>
+
+        <FormField label="Número de parcelas padrão">
+          {({ inputId }) => (
+            <input
+              id={inputId}
+              type="number"
+              min={1}
+              max={120}
+              step={1}
+              value={draft.defaultInstallments}
+              onChange={(e) => setDraft({ ...draft, defaultInstallments: Number(e.target.value) || 0 })}
+              className="min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary"
+            />
+          )}
+        </FormField>
+
+        <FormField label="Taxa de juros padrão (% ao mês)">
+          {({ inputId }) => (
+            <input
+              id={inputId}
+              type="number"
+              min={0}
+              max={100}
+              step={0.1}
+              value={draft.defaultMonthlyRatePct}
+              onChange={(e) => setDraft({ ...draft, defaultMonthlyRatePct: Number(e.target.value) || 0 })}
+              className="min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary"
+            />
+          )}
+        </FormField>
+
         <button
           type="button"
           onClick={handleSave}

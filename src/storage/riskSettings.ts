@@ -8,17 +8,12 @@ export const DEFAULT_RISK_SETTINGS: RiskSettings = {
   minMarginPct: 30,
   minDownPaymentPct: 10,
   maxMonthlyRatePct: 5,
+  defaultInstallments: 18,
+  defaultMonthlyRatePct: 3.5,
 }
 
-function isRiskSettings(value: unknown): value is RiskSettings {
-  if (!value || typeof value !== 'object') return false
-  const s = value as Record<string, unknown>
-  return (
-    typeof s.attentionTermMonths === 'number' &&
-    typeof s.minMarginPct === 'number' &&
-    typeof s.minDownPaymentPct === 'number' &&
-    typeof s.maxMonthlyRatePct === 'number'
-  )
+function numberOrDefault(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
 }
 
 export function loadRiskSettings(): RiskSettings {
@@ -27,8 +22,16 @@ export function loadRiskSettings(): RiskSettings {
 
   try {
     const parsed: unknown = JSON.parse(raw)
-    if (isRiskSettings(parsed)) return parsed
-    return DEFAULT_RISK_SETTINGS
+    if (!parsed || typeof parsed !== 'object') return DEFAULT_RISK_SETTINGS
+    const p = parsed as Record<string, unknown>
+    return {
+      attentionTermMonths: numberOrDefault(p.attentionTermMonths, DEFAULT_RISK_SETTINGS.attentionTermMonths),
+      minMarginPct: numberOrDefault(p.minMarginPct, DEFAULT_RISK_SETTINGS.minMarginPct),
+      minDownPaymentPct: numberOrDefault(p.minDownPaymentPct, DEFAULT_RISK_SETTINGS.minDownPaymentPct),
+      maxMonthlyRatePct: numberOrDefault(p.maxMonthlyRatePct, DEFAULT_RISK_SETTINGS.maxMonthlyRatePct),
+      defaultInstallments: numberOrDefault(p.defaultInstallments, DEFAULT_RISK_SETTINGS.defaultInstallments),
+      defaultMonthlyRatePct: numberOrDefault(p.defaultMonthlyRatePct, DEFAULT_RISK_SETTINGS.defaultMonthlyRatePct),
+    }
   } catch {
     return DEFAULT_RISK_SETTINGS
   }

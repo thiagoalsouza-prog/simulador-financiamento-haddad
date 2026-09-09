@@ -44,9 +44,9 @@ function App() {
   const [treatmentValue, setTreatmentValue] = useState(14800)
   const [directCost, setDirectCost] = useState(6000)
   const [downPayment, setDownPayment] = useState(2500)
-  const [monthlyRatePct, setMonthlyRatePct] = useState(3.5)
+  const [monthlyRatePct, setMonthlyRatePct] = useState(() => loadRiskSettings().defaultMonthlyRatePct)
   const [mode, setMode] = useState<SimulationMode>('byTerm')
-  const [installments, setInstallments] = useState(18)
+  const [installments, setInstallments] = useState(() => loadRiskSettings().defaultInstallments)
   const [maxInstallment, setMaxInstallment] = useState(1000)
 
   const [scenarios, setScenarios] = useState<Scenario[]>([])

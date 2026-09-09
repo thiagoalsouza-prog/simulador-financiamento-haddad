@@ -12,6 +12,8 @@ export interface RiskSettings {
   minMarginPct: number
   minDownPaymentPct: number
   maxMonthlyRatePct: number
+  defaultInstallments: number
+  defaultMonthlyRatePct: number
 }
 
 export interface AmortizationRow {
