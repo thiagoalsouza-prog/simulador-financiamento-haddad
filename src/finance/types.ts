@@ -11,6 +11,7 @@ export interface RiskSettings {
   attentionTermMonths: number
   minMarginPct: number
   minDownPaymentPct: number
+  minMonthlyRatePct: number
   maxMonthlyRatePct: number
   defaultInstallments: number
   defaultMonthlyRatePct: number

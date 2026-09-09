@@ -6,7 +6,10 @@ const riskSettings: RiskSettings = {
   attentionTermMonths: 24,
   minMarginPct: 30,
   minDownPaymentPct: 10,
+  minMonthlyRatePct: 2,
   maxMonthlyRatePct: 5,
+  defaultInstallments: 18,
+  defaultMonthlyRatePct: 3.5,
 }
 
 describe('runSimulation', () => {

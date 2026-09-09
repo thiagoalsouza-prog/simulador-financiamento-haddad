@@ -68,6 +68,21 @@ export function RiskSettingsDialog({ open, onClose, settings, onChange }: RiskSe
           )}
         </FormField>
 
+        <FormField label="Juros mínimos (% ao mês)">
+          {({ inputId }) => (
+            <input
+              id={inputId}
+              type="number"
+              min={0}
+              max={100}
+              step={0.1}
+              value={draft.minMonthlyRatePct}
+              onChange={(e) => setDraft({ ...draft, minMonthlyRatePct: Number(e.target.value) || 0 })}
+              className="min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary"
+            />
+          )}
+        </FormField>
+
         <FormField label="Juros máximos (% ao mês)">
           {({ inputId }) => (
             <input

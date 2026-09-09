@@ -19,6 +19,9 @@ export function evaluateRisk(input: RiskInput, settings: RiskSettings): RiskEval
   if (input.downPaymentPct < settings.minDownPaymentPct) {
     alerts.push(`Entrada abaixo do mínimo definido (${settings.minDownPaymentPct}% do tratamento).`)
   }
+  if (input.monthlyRatePct < settings.minMonthlyRatePct) {
+    alerts.push(`Juros abaixo do mínimo definido (${settings.minMonthlyRatePct}% ao mês).`)
+  }
   if (input.monthlyRatePct > settings.maxMonthlyRatePct) {
     alerts.push(`Juros acima do máximo definido (${settings.maxMonthlyRatePct}% ao mês).`)
   }
