@@ -19,26 +19,29 @@ export interface ProposalInput {
  */
 export function buildProposalText(input: ProposalInput): string {
   const name = input.patientName.trim()
-  const greeting = name ? `Olá, ${name}! Tudo bem?` : 'Olá! Tudo bem?'
+  const greeting = name ? `Olá, ${name}! Tudo bem? 😊` : 'Olá! Tudo bem? 😊'
 
   const lines = [
     greeting,
     '',
-    'Preparamos uma condição de pagamento para o seu tratamento na Clínica Haddad:',
+    'Preparamos uma condição especial para facilitar o início do seu tratamento na Clínica Haddad, com *parcelamento direto no boleto*:',
     '',
-    `• Valor do tratamento: ${formatCurrency(input.treatmentValue)}`,
-    `• Entrada: ${formatCurrency(input.downPayment)}`,
-    `• Saldo em ${input.installmentsCount} parcelas de ${formatCurrency(input.installmentValue)}`,
-    `• Total da condição: ${formatCurrency(input.totalReceived)}`,
+    `*Valor do tratamento:* ${formatCurrency(input.treatmentValue)}`,
+    `*Valor inicial:* ${formatCurrency(input.downPayment)}`,
+    `*Parcelamento:* ${input.installmentsCount}x de ${formatCurrency(input.installmentValue)} no boleto`,
+    '',
+    `*Total da condição:* ${formatCurrency(input.totalReceived)}`,
   ]
 
   if (!input.hideInterest) {
-    lines.push(`• Taxa da condição: ${formatPercent(input.monthlyRatePct, 2)} ao mês`)
+    lines.push(`*Taxa de financiamento:* ${formatPercent(input.monthlyRatePct, 2)} ao mês`)
   }
 
   lines.push(
     '',
-    'Esta é uma simulação e a condição poderá ser confirmada no momento da contratação. Podemos reservar essa opção para você?',
+    'Essa opção permite que você realize seu tratamento agora e organize o pagamento ao longo dos próximos meses, sem comprometer o limite do cartão de crédito.',
+    '',
+    '*Essa condição fica boa para você iniciar seu tratamento?*',
   )
 
   return lines.join('\n')

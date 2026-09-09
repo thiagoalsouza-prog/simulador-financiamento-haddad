@@ -1,4 +1,5 @@
-import { ClipboardList, Settings } from 'lucide-react'
+import { ClipboardList, Moon, Settings, Sun } from 'lucide-react'
+import type { Theme } from '../storage/theme'
 import type { View } from '../types'
 
 interface HeaderProps {
@@ -6,9 +7,18 @@ interface HeaderProps {
   onChangeView: (view: View) => void
   onOpenTreatments: () => void
   onOpenRiskSettings: () => void
+  theme: Theme
+  onToggleTheme: () => void
 }
 
-export function Header({ view, onChangeView, onOpenTreatments, onOpenRiskSettings }: HeaderProps) {
+export function Header({
+  view,
+  onChangeView,
+  onOpenTreatments,
+  onOpenRiskSettings,
+  theme,
+  onToggleTheme,
+}: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-3 sm:px-6">
@@ -53,6 +63,16 @@ export function Header({ view, onChangeView, onOpenTreatments, onOpenRiskSetting
               Área gerencial
             </button>
           </nav>
+
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            title={theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:border-primary hover:text-primary"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
 
           <button
             type="button"

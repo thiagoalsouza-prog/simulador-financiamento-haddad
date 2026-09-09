@@ -53,15 +53,15 @@ describe('buildProposalText', () => {
     const withInterest = buildProposalText(baseInput)
     const withoutInterest = buildProposalText({ ...baseInput, hideInterest: true })
 
-    expect(withInterest).toContain('Taxa da condição')
-    expect(withoutInterest).not.toContain('Taxa da condição')
+    expect(withInterest).toContain('Taxa de financiamento')
+    expect(withoutInterest).not.toContain('Taxa de financiamento')
   })
 
   it('inclui os dados comerciais essenciais', () => {
     const text = buildProposalText(baseInput)
     expect(text).toContain('Valor do tratamento')
-    expect(text).toContain('Entrada')
-    expect(text).toContain('18 parcelas')
+    expect(text).toContain('Valor inicial')
+    expect(text).toContain('18x de')
     expect(text).toContain('Total da condição')
   })
 })

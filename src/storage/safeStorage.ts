@@ -4,7 +4,7 @@
  * tratamentos cadastrados e parâmetros de risco, conforme a política de
  * privacidade do produto.
  */
-const ALLOWED_KEYS = ['haddad:treatments', 'haddad:riskSettings'] as const
+const ALLOWED_KEYS = ['haddad:treatments', 'haddad:riskSettings', 'haddad:theme'] as const
 
 export type AllowedStorageKey = (typeof ALLOWED_KEYS)[number]
 

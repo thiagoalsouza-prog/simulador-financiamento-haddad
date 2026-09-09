@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { SimulationSnapshot } from './api/patients'
 import { CommercialResult } from './components/CommercialResult'
 import { Header } from './components/Header'
@@ -13,6 +13,7 @@ import type { Scenario, SimulationMode, SimulationParams } from './finance/types
 import { runSimulation } from './finance/simulate'
 import { validateSimulationParams } from './finance/validate'
 import { loadRiskSettings, saveRiskSettings } from './storage/riskSettings'
+import { loadTheme, saveTheme, type Theme } from './storage/theme'
 import { loadTreatments, saveTreatments } from './storage/treatments'
 import type { View } from './types'
 
@@ -21,6 +22,16 @@ const MAX_SCENARIOS = 3
 function App() {
   const [view, setView] = useState<View>('commercial')
   const [showPatientsPage, setShowPatientsPage] = useState(false)
+  const [theme, setTheme] = useState<Theme>(() => loadTheme())
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    saveTheme(theme)
+  }, [theme])
+
+  function handleToggleTheme() {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+  }
 
   const [patientName, setPatientName] = useState('')
   const [patientPhone, setPatientPhone] = useState('')
@@ -127,6 +138,8 @@ function App() {
         onChangeView={handleChangeView}
         onOpenTreatments={() => setTreatmentsOpen(true)}
         onOpenRiskSettings={() => setRiskSettingsOpen(true)}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
       />
 
       {showPatientsPage ? (
