@@ -4,9 +4,9 @@ Aplicação web (React + TypeScript + Vite no front-end, serverless functions +
 PostgreSQL no back-end, hospedada na Vercel) usada pela equipe da Clínica
 Haddad durante negociações de tratamentos odontológicos. Calcula financiamento
 pelo Sistema Price, mostra em qual parcela o custo direto e o valor principal
-são recuperados, separa a visão comercial da área gerencial, gera propostas
-comerciais para WhatsApp e permite salvar nome + telefone de pacientes para
-consulta posterior.
+são recuperados (sempre em modo gerencial — sem alternância de visão), gera
+propostas comerciais para WhatsApp e permite salvar nome + telefone de
+pacientes para consulta posterior.
 
 Não possui login. Tratamentos cadastrados e parâmetros de risco ficam salvos
 em `localStorage` (por navegador); CPF nunca é salvo em lugar nenhum; nome e
@@ -83,14 +83,16 @@ Configuração necessária no dashboard da Vercel: variável de ambiente
 
 ## Notas de segurança e privacidade
 
-- A "Área gerencial" é uma separação **visual**, não uma barreira de
-  autenticação — a aplicação é pública e não tem login. Isso vale também para
-  a busca de pacientes salvos, que fica na área gerencial mas sem senha real.
+- A aplicação é pública e não tem login (nem para as informações gerenciais,
+  que ficam sempre visíveis). Isso vale também para a busca de pacientes
+  salvos, sem senha real.
 - CPF nunca é salvo em lugar nenhum, nunca aparece na proposta e usa
   `autocomplete="off"`.
-- Nome do paciente e telefone só são enviados ao banco de dados quando o
-  usuário clica em "Salvar paciente" — nunca automaticamente. Fora isso,
-  existem apenas em memória (estado do React) e somem ao recarregar a página.
+- Nome, telefone e a simulação atual só começam a ser enviados ao banco de
+  dados quando o usuário clica em "Salvar paciente" pela primeira vez; depois
+  disso, alterações na simulação são salvas automaticamente (upsert pelo par
+  nome+telefone). Antes do primeiro salvamento, tudo existe apenas em memória
+  (estado do React) e some ao recarregar a página.
 - `src/storage/safeStorage.ts` é o único ponto de acesso ao `localStorage` do
   navegador e restringe a gravação a duas chaves: tratamentos cadastrados e
   parâmetros de risco (nada de dados de pacientes passa por aqui).

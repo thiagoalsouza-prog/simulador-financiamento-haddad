@@ -16,7 +16,6 @@ import { validatePatientInfo, validateSimulationParams } from './finance/validat
 import { loadRiskSettings, saveRiskSettings } from './storage/riskSettings'
 import { loadTheme, saveTheme, type Theme } from './storage/theme'
 import { loadTreatments, saveTreatments } from './storage/treatments'
-import type { View } from './types'
 import { isValidPhone } from './utils/phone'
 
 const AUTOSAVE_DELAY_MS = 900
@@ -24,7 +23,6 @@ const AUTOSAVE_DELAY_MS = 900
 const MAX_SCENARIOS = 3
 
 function App() {
-  const [view, setView] = useState<View>('commercial')
   const [showPatientsPage, setShowPatientsPage] = useState(false)
   const [theme, setTheme] = useState<Theme>(() => loadTheme())
 
@@ -152,11 +150,6 @@ function App() {
     return () => clearTimeout(handle)
   }, [patientSaved, simulationSnapshot, patientName, patientPhone])
 
-  function handleChangeView(next: View) {
-    setView(next)
-    setShowPatientsPage(false)
-  }
-
   function handleSelectTreatment(id: string) {
     setTreatmentId(id)
     if (id === 'custom') return
@@ -204,8 +197,6 @@ function App() {
   return (
     <div className="min-h-screen bg-background pb-16">
       <Header
-        view={view}
-        onChangeView={handleChangeView}
         onOpenTreatments={() => setTreatmentsOpen(true)}
         onOpenRiskSettings={() => setRiskSettingsOpen(true)}
         onOpenPatients={() => setShowPatientsPage(true)}
@@ -219,7 +210,6 @@ function App() {
         <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start">
           <div className="lg:sticky lg:top-24 lg:w-[380px] lg:shrink-0">
             <SimulationForm
-              view={view}
               patientName={patientName}
               onPatientNameChange={setPatientName}
               patientPhone={patientPhone}
@@ -262,7 +252,7 @@ function App() {
               onCompareScenario={handleAddScenario}
             />
 
-            {view === 'manager' && canCompute && outcome.feasible && (
+            {canCompute && outcome.feasible && (
               <ManagerAnalysis
                 outcome={outcome}
                 directCost={directCost}
@@ -272,7 +262,7 @@ function App() {
               />
             )}
 
-            <ScenarioComparison scenarios={scenarios} view={view} onClear={() => setScenarios([])} />
+            <ScenarioComparison scenarios={scenarios} onClear={() => setScenarios([])} />
           </div>
         </main>
       )}

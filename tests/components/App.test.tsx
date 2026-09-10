@@ -16,7 +16,7 @@ async function fillAndSavePatient(user: UserEvent) {
   expect(await screen.findByRole('button', { name: /Paciente salvo/i })).toBeInTheDocument()
 }
 
-describe('cenário 11 — separação entre visão comercial e área gerencial', () => {
+describe('cenário 11 — app sempre em modo gerencial', () => {
   beforeEach(() => {
     window.localStorage.clear()
     vi.stubGlobal(
@@ -39,18 +39,15 @@ describe('cenário 11 — separação entre visão comercial e área gerencial',
     vi.unstubAllGlobals()
   })
 
-  it('oculta informações gerenciais na visão comercial e exibe na área gerencial', async () => {
+  it('exibe informações gerenciais (custo direto, resultado, risco) sem precisar de alternância de visão', async () => {
     const user = userEvent.setup()
     render(<App />)
 
-    expect(screen.queryByText(/Informações internas/i)).not.toBeInTheDocument()
-    expect(screen.queryByLabelText(/Custo direto/i)).not.toBeInTheDocument()
+    expect(screen.getByLabelText(/Custo direto/i)).toBeInTheDocument()
 
     await fillAndSavePatient(user)
-    await user.click(screen.getByRole('button', { name: /Área gerencial/i }))
 
     expect(await screen.findByText(/Informações internas/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Custo direto/i)).toBeInTheDocument()
   })
 
   it('não calcula a condição enquanto nome, telefone e CPF do paciente não são informados', () => {

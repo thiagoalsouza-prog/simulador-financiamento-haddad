@@ -1,12 +1,10 @@
 import { Trash2 } from 'lucide-react'
 import type { Scenario } from '../finance/types'
-import type { View } from '../types'
 import { formatCurrency } from '../utils/currency'
 import { formatInstallments, formatPercent } from '../utils/numbers'
 
 interface ScenarioComparisonProps {
   scenarios: Scenario[]
-  view: View
   onClear: () => void
 }
 
@@ -16,7 +14,7 @@ const RISK_LABEL = {
   high: 'Elevado',
 } as const
 
-export function ScenarioComparison({ scenarios, view, onClear }: ScenarioComparisonProps) {
+export function ScenarioComparison({ scenarios, onClear }: ScenarioComparisonProps) {
   if (scenarios.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-surface p-5 shadow-soft sm:p-6">
@@ -67,29 +65,25 @@ export function ScenarioComparison({ scenarios, view, onClear }: ScenarioCompari
             <ScenarioRow label="Total recebido" scenarios={scenarios} render={(s) => formatCurrency(s.outcome.totalReceived)} />
             <ScenarioRow label="Custo do crédito" scenarios={scenarios} render={(s) => formatCurrency(s.outcome.creditCost)} />
 
-            {view === 'manager' && (
-              <>
-                <ScenarioRow
-                  label="Recuperação do custo"
-                  scenarios={scenarios}
-                  render={(s) =>
-                    !s.outcome.costRecovery.covered
-                      ? 'Não alcançada'
-                      : s.outcome.costRecovery.installment === 0
-                        ? 'Na entrada'
-                        : `${s.outcome.costRecovery.installment}ª parcela`
-                  }
-                />
-                <ScenarioRow
-                  label="Resultado"
-                  scenarios={scenarios}
-                  render={(s) => formatCurrency(s.outcome.managerialResult)}
-                  toneFor={(s) => (s.outcome.managerialResult > 0 ? 'success' : s.outcome.managerialResult < 0 ? 'danger' : undefined)}
-                />
-                <ScenarioRow label="Margem" scenarios={scenarios} render={(s) => formatPercent(s.outcome.marginPct, 1)} />
-                <ScenarioRow label="Risco" scenarios={scenarios} render={(s) => RISK_LABEL[s.outcome.risk.level]} />
-              </>
-            )}
+            <ScenarioRow
+              label="Recuperação do custo"
+              scenarios={scenarios}
+              render={(s) =>
+                !s.outcome.costRecovery.covered
+                  ? 'Não alcançada'
+                  : s.outcome.costRecovery.installment === 0
+                    ? 'Na entrada'
+                    : `${s.outcome.costRecovery.installment}ª parcela`
+              }
+            />
+            <ScenarioRow
+              label="Resultado"
+              scenarios={scenarios}
+              render={(s) => formatCurrency(s.outcome.managerialResult)}
+              toneFor={(s) => (s.outcome.managerialResult > 0 ? 'success' : s.outcome.managerialResult < 0 ? 'danger' : undefined)}
+            />
+            <ScenarioRow label="Margem" scenarios={scenarios} render={(s) => formatPercent(s.outcome.marginPct, 1)} />
+            <ScenarioRow label="Risco" scenarios={scenarios} render={(s) => RISK_LABEL[s.outcome.risk.level]} />
           </tbody>
         </table>
       </div>

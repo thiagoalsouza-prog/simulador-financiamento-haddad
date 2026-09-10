@@ -1,7 +1,6 @@
 import { Check, Loader2, UserPlus } from 'lucide-react'
 import type { SimulationMode, Treatment } from '../finance/types'
 import type { ValidationErrors } from '../finance/validate'
-import type { View } from '../types'
 import { maskCpf, sanitizeCpfInput } from '../utils/cpf'
 import { maskPhone, sanitizePhoneInput } from '../utils/phone'
 import { FormField } from './FormField'
@@ -11,7 +10,6 @@ import { PercentInput } from './PercentInput'
 export type SaveStatus = 'idle' | 'saving' | 'success' | 'error'
 
 interface SimulationFormProps {
-  view: View
   patientName: string
   onPatientNameChange: (value: string) => void
   patientPhone: string
@@ -44,7 +42,6 @@ interface SimulationFormProps {
 }
 
 export function SimulationForm({
-  view,
   patientName,
   onPatientNameChange,
   patientPhone,
@@ -207,23 +204,21 @@ export function SimulationForm({
           )}
         </FormField>
 
-        {view === 'manager' && (
-          <FormField
-            label="Custo direto"
-            error={errors.directCost}
-            hint="Visível apenas na área gerencial. Nunca aparece na proposta."
-          >
-            {({ inputId, describedBy }) => (
-              <MoneyInput
-                id={inputId}
-                value={directCost}
-                onChange={onDirectCostChange}
-                describedBy={describedBy}
-                invalid={!!errors.directCost}
-              />
-            )}
-          </FormField>
-        )}
+        <FormField
+          label="Custo direto"
+          error={errors.directCost}
+          hint="Informação interna. Nunca aparece na proposta."
+        >
+          {({ inputId, describedBy }) => (
+            <MoneyInput
+              id={inputId}
+              value={directCost}
+              onChange={onDirectCostChange}
+              describedBy={describedBy}
+              invalid={!!errors.directCost}
+            />
+          )}
+        </FormField>
 
         <FormField label="Entrada" error={errors.downPayment}>
           {({ inputId, describedBy }) => (

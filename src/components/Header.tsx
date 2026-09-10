@@ -1,10 +1,7 @@
 import { ClipboardList, Moon, Search, Settings, Sun } from 'lucide-react'
 import type { Theme } from '../storage/theme'
-import type { View } from '../types'
 
 interface HeaderProps {
-  view: View
-  onChangeView: (view: View) => void
   onOpenTreatments: () => void
   onOpenRiskSettings: () => void
   onOpenPatients: () => void
@@ -13,8 +10,6 @@ interface HeaderProps {
 }
 
 export function Header({
-  view,
-  onChangeView,
   onOpenTreatments,
   onOpenRiskSettings,
   onOpenPatients,
@@ -48,32 +43,6 @@ export function Header({
             <Search size={16} />
             <span className="hidden sm:inline">Pesquisar paciente</span>
           </button>
-
-          <nav
-            aria-label="Alternar visão"
-            className="flex rounded-full border border-border bg-background p-1 text-sm"
-          >
-            <button
-              type="button"
-              aria-pressed={view === 'commercial'}
-              onClick={() => onChangeView('commercial')}
-              className={`rounded-full px-3 py-1.5 font-medium transition sm:px-4 ${
-                view === 'commercial' ? 'bg-primary text-white shadow-soft' : 'text-muted hover:text-text'
-              }`}
-            >
-              Visão comercial
-            </button>
-            <button
-              type="button"
-              aria-pressed={view === 'manager'}
-              onClick={() => onChangeView('manager')}
-              className={`rounded-full px-3 py-1.5 font-medium transition sm:px-4 ${
-                view === 'manager' ? 'bg-primary text-white shadow-soft' : 'text-muted hover:text-text'
-              }`}
-            >
-              Área gerencial
-            </button>
-          </nav>
 
           <button
             type="button"
