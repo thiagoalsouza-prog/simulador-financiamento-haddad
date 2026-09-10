@@ -208,6 +208,7 @@ function App() {
         onChangeView={handleChangeView}
         onOpenTreatments={() => setTreatmentsOpen(true)}
         onOpenRiskSettings={() => setRiskSettingsOpen(true)}
+        onOpenPatients={() => setShowPatientsPage(true)}
         theme={theme}
         onToggleTheme={handleToggleTheme}
       />

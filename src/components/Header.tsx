@@ -1,4 +1,4 @@
-import { ClipboardList, Moon, Settings, Sun } from 'lucide-react'
+import { ClipboardList, Moon, Search, Settings, Sun } from 'lucide-react'
 import type { Theme } from '../storage/theme'
 import type { View } from '../types'
 
@@ -7,6 +7,7 @@ interface HeaderProps {
   onChangeView: (view: View) => void
   onOpenTreatments: () => void
   onOpenRiskSettings: () => void
+  onOpenPatients: () => void
   theme: Theme
   onToggleTheme: () => void
 }
@@ -16,6 +17,7 @@ export function Header({
   onChangeView,
   onOpenTreatments,
   onOpenRiskSettings,
+  onOpenPatients,
   theme,
   onToggleTheme,
 }: HeaderProps) {
@@ -38,6 +40,15 @@ export function Header({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenPatients}
+            className="flex min-h-10 items-center gap-2 rounded-full border border-primary/40 bg-surface px-3 py-1.5 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary hover:text-white"
+          >
+            <Search size={16} />
+            <span className="hidden sm:inline">Pesquisar paciente</span>
+          </button>
+
           <nav
             aria-label="Alternar visão"
             className="flex rounded-full border border-border bg-background p-1 text-sm"
