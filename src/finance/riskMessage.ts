@@ -26,6 +26,45 @@ const RISK_LABEL: Record<RiskLevel, string> = {
   high: 'Risco elevado',
 }
 
+function buildSurgeryReleaseAlert(costRecovery: CostRecoveryResult, directCost: number): string[] {
+  if (costRecovery.covered) {
+    const isFromDownPaymentAlone = costRecovery.installment === 0
+    const milestone = isFromDownPaymentAlone ? 'NA ENTRADA' : `NA ${costRecovery.installment}ª PARCELA`
+
+    return [
+      '🟢 RECUPERAÇÃO DO CUSTO DIRETO',
+      '',
+      `CUSTO TOTALMENTE RECUPERADO ${milestone}`,
+      '',
+      `Entrada + parcelas recebidas: ${formatCurrency(costRecovery.receivedAtRecovery)}`,
+      `Custo direto do tratamento: ${formatCurrency(directCost)}`,
+      '',
+      isFromDownPaymentAlone
+        ? '✅ O custo direto do tratamento já está coberto pela entrada e a cirurgia pode ser liberada.'
+        : `✅ A partir da ${costRecovery.installment}ª parcela paga, o custo direto do tratamento estará coberto e a cirurgia poderá ser liberada.`,
+      '',
+      isFromDownPaymentAlone
+        ? 'LIBERAÇÃO DA CIRURGIA: JÁ PODE SER LIBERADA'
+        : `LIBERAÇÃO DA CIRURGIA: APÓS O PAGAMENTO DA ${costRecovery.installment}ª PARCELA`,
+    ]
+  }
+
+  const stillMissing = Math.max(0, directCost - costRecovery.receivedAtRecovery)
+  return [
+    '🔴 RECUPERAÇÃO DO CUSTO DIRETO',
+    '',
+    'CUSTO NÃO SERÁ TOTALMENTE RECUPERADO NAS PARCELAS PREVISTAS',
+    '',
+    `Entrada + todas as parcelas recebidas: ${formatCurrency(costRecovery.receivedAtRecovery)}`,
+    `Custo direto do tratamento: ${formatCurrency(directCost)}`,
+    `Ainda faltará: ${formatCurrency(stillMissing)}`,
+    '',
+    '⚠️ O custo direto do tratamento não será totalmente coberto pelas parcelas previstas.',
+    '',
+    'LIBERAÇÃO DA CIRURGIA: NÃO LIBERAR SEM AVALIAÇÃO ADICIONAL',
+  ]
+}
+
 function buildRecoveryBlock(
   recovery: CostRecoveryResult,
   target: number,
@@ -75,6 +114,8 @@ export function buildRiskMessageText(input: RiskMessageInput): string {
   const name = input.patientName.trim()
 
   const lines = [
+    ...buildSurgeryReleaseAlert(input.costRecovery, input.directCost),
+    '',
     '⚠️ MENSAGEM DE RISCO — USO INTERNO (NÃO ENVIAR AO PACIENTE)',
     '',
     `Paciente: ${name || 'Não informado'}`,
@@ -101,17 +142,6 @@ export function buildRiskMessageText(input: RiskMessageInput): string {
   }
 
   lines.push(
-    '',
-    ...buildRecoveryBlock(
-      input.costRecovery,
-      input.directCost,
-      input.downPayment,
-      'Recuperação do custo',
-      'custo',
-      'CUSTO',
-      'ATENÇÃO: OPERAÇÃO EM PREJUÍZO',
-      'O RECEBIMENTO NÃO COBRE O CUSTO',
-    ),
     '',
     ...buildRecoveryBlock(
       input.principalRecovery,

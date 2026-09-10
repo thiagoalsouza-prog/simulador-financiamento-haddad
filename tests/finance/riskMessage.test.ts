@@ -47,12 +47,30 @@ describe('buildRiskMessageText', () => {
     expect(text).toContain('Classificação de risco')
   })
 
-  it('inclui os blocos de recuperação do custo e do valor principal', () => {
+  it('inclui o alerta de liberação da cirurgia como destaque na primeira linha', () => {
     const text = buildRiskMessageText(baseInput)
+    const lines = text.split('\n')
 
-    expect(text).toContain('Recuperação do custo')
-    expect(text).toContain('O CUSTO SERÁ COBERTO NA 5ª PARCELA')
-    expect(text).toContain(`Entrada + parcelas somam ${formatCurrency(8480.2)}`)
+    expect(lines[0]).toBe('🟢 RECUPERAÇÃO DO CUSTO DIRETO')
+    expect(text).toContain('CUSTO TOTALMENTE RECUPERADO NA 5ª PARCELA')
+    expect(text).toContain(`Entrada + parcelas recebidas: ${formatCurrency(8480.2)}`)
+    expect(text).toContain(`Custo direto do tratamento: ${formatCurrency(6000)}`)
+    expect(text).toContain('a cirurgia poderá ser liberada')
+    expect(text).toContain('LIBERAÇÃO DA CIRURGIA: APÓS O PAGAMENTO DA 5ª PARCELA')
+  })
+
+  it('sinaliza liberação imediata quando a entrada sozinha cobre o custo', () => {
+    const text = buildRiskMessageText({
+      ...baseInput,
+      costRecovery: { covered: true, installment: 0, receivedAtRecovery: 2500 },
+    })
+
+    expect(text).toContain('CUSTO TOTALMENTE RECUPERADO NA ENTRADA')
+    expect(text).toContain('LIBERAÇÃO DA CIRURGIA: JÁ PODE SER LIBERADA')
+  })
+
+  it('inclui o bloco de recuperação do valor principal', () => {
+    const text = buildRiskMessageText(baseInput)
 
     expect(text).toContain('Recuperação do valor principal')
     expect(text).toContain('O VALOR PRINCIPAL SERÁ COBERTO NA 14ª PARCELA')
@@ -81,10 +99,13 @@ describe('buildRiskMessageText', () => {
   it('sinaliza que o custo não é coberto quando a recuperação falha', () => {
     const text = buildRiskMessageText({
       ...baseInput,
-      costRecovery: { covered: false, installment: null, receivedAtRecovery: 10000 },
+      costRecovery: { covered: false, installment: null, receivedAtRecovery: 5000 },
     })
-    expect(text).toContain('ATENÇÃO: OPERAÇÃO EM PREJUÍZO')
-    expect(text).toContain('O RECEBIMENTO NÃO COBRE O CUSTO')
+    const lines = text.split('\n')
+
+    expect(lines[0]).toBe('🔴 RECUPERAÇÃO DO CUSTO DIRETO')
+    expect(text).toContain('CUSTO NÃO SERÁ TOTALMENTE RECUPERADO NAS PARCELAS PREVISTAS')
+    expect(text).toContain('LIBERAÇÃO DA CIRURGIA: NÃO LIBERAR SEM AVALIAÇÃO ADICIONAL')
   })
 
   it('funciona sem nome do paciente', () => {
