@@ -7,6 +7,7 @@ interface CommercialResultProps {
   outcome: SimulationOutcome
   downPayment: number
   canCompute: boolean
+  blockedMessage?: string
   onGenerateProposal: () => void
   onCompareScenario: () => void
 }
@@ -15,6 +16,7 @@ export function CommercialResult({
   outcome,
   downPayment,
   canCompute,
+  blockedMessage,
   onGenerateProposal,
   onCompareScenario,
 }: CommercialResultProps) {
@@ -29,7 +31,8 @@ export function CommercialResult({
       {!ready ? (
         <p role="status" className="rounded-xl bg-background p-4 text-sm text-muted">
           {outcome.infeasibleMessage ??
-            'Preencha nome, CPF, telefone do paciente e os dados do tratamento para calcular a condição de pagamento.'}
+            blockedMessage ??
+            'Preencha os dados do tratamento para calcular a condição de pagamento.'}
         </p>
       ) : (
         <>

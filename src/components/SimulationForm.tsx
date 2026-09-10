@@ -1,16 +1,14 @@
 import { Check, Loader2, UserPlus } from 'lucide-react'
-import { useState } from 'react'
-import { savePatient, type SimulationSnapshot } from '../api/patients'
 import type { SimulationMode, Treatment } from '../finance/types'
 import type { ValidationErrors } from '../finance/validate'
 import type { View } from '../types'
 import { maskCpf, sanitizeCpfInput } from '../utils/cpf'
-import { isValidPhone, maskPhone, sanitizePhoneInput } from '../utils/phone'
+import { maskPhone, sanitizePhoneInput } from '../utils/phone'
 import { FormField } from './FormField'
 import { MoneyInput } from './MoneyInput'
 import { PercentInput } from './PercentInput'
 
-type SaveStatus = 'idle' | 'saving' | 'success' | 'error'
+export type SaveStatus = 'idle' | 'saving' | 'success' | 'error'
 
 interface SimulationFormProps {
   view: View
@@ -39,7 +37,10 @@ interface SimulationFormProps {
   onMaxInstallmentChange: (value: number) => void
   errors: ValidationErrors
   infeasibleMessage?: string
-  simulationSnapshot: SimulationSnapshot | null
+  patientSaved: boolean
+  saveStatus: SaveStatus
+  saveError?: string
+  onSavePatient: () => void
 }
 
 export function SimulationForm({
@@ -69,31 +70,11 @@ export function SimulationForm({
   onMaxInstallmentChange,
   errors,
   infeasibleMessage,
-  simulationSnapshot,
+  patientSaved,
+  saveStatus,
+  saveError,
+  onSavePatient,
 }: SimulationFormProps) {
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
-  const [saveError, setSaveError] = useState<string | undefined>()
-
-  async function handleSavePatient() {
-    if (!patientName.trim() || !isValidPhone(patientPhone)) {
-      setSaveStatus('error')
-      setSaveError('Informe nome completo e um telefone válido com DDD.')
-      return
-    }
-
-    setSaveStatus('saving')
-    setSaveError(undefined)
-
-    try {
-      await savePatient(patientName.trim(), patientPhone, simulationSnapshot)
-      setSaveStatus('success')
-      setTimeout(() => setSaveStatus('idle'), 2500)
-    } catch (err) {
-      setSaveStatus('error')
-      setSaveError(err instanceof Error ? err.message : 'Não foi possível salvar o paciente.')
-    }
-  }
-
   return (
     <div className="flex flex-col gap-6 rounded-2xl border border-border bg-surface p-5 shadow-soft sm:p-6">
       <section className="flex flex-col gap-4">
@@ -159,7 +140,7 @@ export function SimulationForm({
 
         <button
           type="button"
-          onClick={handleSavePatient}
+          onClick={onSavePatient}
           disabled={saveStatus === 'saving'}
           className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -180,10 +161,11 @@ export function SimulationForm({
         )}
 
         <p className="text-xs text-muted">
-          Nome, telefone e CPF são obrigatórios para calcular a simulação. O CPF nunca é salvo nem
-          aparece na proposta. Nome, telefone e a simulação atual só são gravados no banco de dados
-          quando você clica em "Salvar paciente" — um novo salvamento substitui a simulação anterior
-          do mesmo paciente. A busca fica disponível na área gerencial.
+          {patientSaved
+            ? 'Paciente salvo. Alterações na simulação são salvas automaticamente a partir de agora.'
+            : 'Nome, telefone e CPF são obrigatórios. Clique em "Salvar paciente" para liberar o cálculo da simulação.'}{' '}
+          O CPF nunca é salvo nem aparece na proposta — apenas nome, telefone e a simulação atual são
+          gravados no banco de dados. A busca fica disponível na área gerencial.
         </p>
       </section>
 

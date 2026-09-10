@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { SimulationSnapshot } from './api/patients'
+import { savePatient, type SimulationSnapshot } from './api/patients'
 import { CommercialResult } from './components/CommercialResult'
 import { Header } from './components/Header'
 import { ManagerAnalysis } from './components/ManagerAnalysis'
@@ -8,7 +8,7 @@ import { ProposalDialog } from './components/ProposalDialog'
 import { RiskMessageDialog } from './components/RiskMessageDialog'
 import { RiskSettingsDialog } from './components/RiskSettingsDialog'
 import { ScenarioComparison } from './components/ScenarioComparison'
-import { SimulationForm } from './components/SimulationForm'
+import { SimulationForm, type SaveStatus } from './components/SimulationForm'
 import { TreatmentsDialog } from './components/TreatmentsDialog'
 import type { Scenario, SimulationMode, SimulationParams } from './finance/types'
 import { runSimulation } from './finance/simulate'
@@ -17,6 +17,9 @@ import { loadRiskSettings, saveRiskSettings } from './storage/riskSettings'
 import { loadTheme, saveTheme, type Theme } from './storage/theme'
 import { loadTreatments, saveTreatments } from './storage/treatments'
 import type { View } from './types'
+import { isValidPhone } from './utils/phone'
+
+const AUTOSAVE_DELAY_MS = 900
 
 const MAX_SCENARIOS = 3
 
@@ -37,6 +40,13 @@ function App() {
   const [patientName, setPatientName] = useState('')
   const [patientPhone, setPatientPhone] = useState('')
   const [cpf, setCpf] = useState('')
+  const [patientSaved, setPatientSaved] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const [saveError, setSaveError] = useState<string | undefined>()
+
+  useEffect(() => {
+    setPatientSaved(false)
+  }, [patientName, patientPhone])
 
   const [treatments, setTreatments] = useState(() => loadTreatments())
   const [riskSettings, setRiskSettings] = useState(() => loadRiskSettings())
@@ -79,14 +89,16 @@ function App() {
     () => ({ ...simulationErrors, ...patientErrors }),
     [simulationErrors, patientErrors],
   )
-  const canCompute = Object.keys(errors).length === 0
+  const treatmentReady = Object.keys(simulationErrors).length === 0
+  const patientFieldsValid = Object.keys(patientErrors).length === 0
+  const canCompute = treatmentReady && patientFieldsValid && patientSaved
 
   const outcome = useMemo(() => runSimulation(params, riskSettings), [params, riskSettings])
 
   const treatmentName = treatments.find((t) => t.id === treatmentId)?.name ?? 'Personalizado'
 
   const simulationSnapshot: SimulationSnapshot | null = useMemo(() => {
-    if (!canCompute || !outcome.feasible) return null
+    if (!treatmentReady || !outcome.feasible) return null
     return {
       tratamentoNome: treatmentName,
       valorTratamento: treatmentValue,
@@ -97,7 +109,48 @@ function App() {
       valorParcela: outcome.installmentValue,
       totalReceber: outcome.totalReceived,
     }
-  }, [canCompute, outcome, treatmentName, treatmentValue, downPayment, monthlyRatePct, mode])
+  }, [treatmentReady, outcome, treatmentName, treatmentValue, downPayment, monthlyRatePct, mode])
+
+  async function handleSavePatient() {
+    if (!patientName.trim() || !isValidPhone(patientPhone)) {
+      setSaveStatus('error')
+      setSaveError('Informe nome completo e um telefone válido com DDD.')
+      return
+    }
+
+    setSaveStatus('saving')
+    setSaveError(undefined)
+
+    try {
+      await savePatient(patientName.trim(), patientPhone, simulationSnapshot)
+      setSaveStatus('success')
+      setPatientSaved(true)
+      setTimeout(() => setSaveStatus('idle'), 2500)
+    } catch (err) {
+      setSaveStatus('error')
+      setSaveError(err instanceof Error ? err.message : 'Não foi possível salvar o paciente.')
+    }
+  }
+
+  useEffect(() => {
+    if (!patientSaved || !simulationSnapshot) return
+
+    const handle = setTimeout(() => {
+      setSaveStatus('saving')
+      setSaveError(undefined)
+      savePatient(patientName.trim(), patientPhone, simulationSnapshot)
+        .then(() => {
+          setSaveStatus('success')
+          setTimeout(() => setSaveStatus('idle'), 2000)
+        })
+        .catch((err: unknown) => {
+          setSaveStatus('error')
+          setSaveError(err instanceof Error ? err.message : 'Não foi possível salvar a simulação.')
+        })
+    }, AUTOSAVE_DELAY_MS)
+
+    return () => clearTimeout(handle)
+  }, [patientSaved, simulationSnapshot, patientName, patientPhone])
 
   function handleChangeView(next: View) {
     setView(next)
@@ -126,6 +179,13 @@ function App() {
     setRiskSettings(next)
     saveRiskSettings(next)
   }
+
+  const blockedMessage =
+    !treatmentReady || !patientFieldsValid
+      ? 'Preencha nome, CPF, telefone do paciente e os dados do tratamento para calcular a condição de pagamento.'
+      : !patientSaved
+        ? 'Clique em "Salvar paciente" para liberar o cálculo da condição de pagamento.'
+        : undefined
 
   function handleAddScenario() {
     if (!canCompute || !outcome.feasible) return
@@ -184,7 +244,10 @@ function App() {
               onMaxInstallmentChange={setMaxInstallment}
               errors={errors}
               infeasibleMessage={mode === 'byInstallment' ? outcome.infeasibleMessage : undefined}
-              simulationSnapshot={simulationSnapshot}
+              patientSaved={patientSaved}
+              saveStatus={saveStatus}
+              saveError={saveError}
+              onSavePatient={handleSavePatient}
             />
           </div>
 
@@ -193,6 +256,7 @@ function App() {
               outcome={outcome}
               downPayment={downPayment}
               canCompute={canCompute}
+              blockedMessage={blockedMessage}
               onGenerateProposal={() => setProposalOpen(true)}
               onCompareScenario={handleAddScenario}
             />
