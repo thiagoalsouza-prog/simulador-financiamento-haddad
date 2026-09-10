@@ -1,4 +1,4 @@
-/** Mantém apenas dígitos e limita a 11 caracteres (CPF). Nunca persiste o valor. */
+/** Mantém apenas dígitos e limita a 11 caracteres (CPF). */
 export function sanitizeCpfInput(raw: string): string {
   return raw.replace(/\D/g, '').slice(0, 11)
 }
@@ -14,7 +14,7 @@ export function maskCpf(digits: string): string {
   return result
 }
 
-/** Um CPF válido para a simulação tem 11 dígitos. Nunca é persistido. */
+/** Um CPF válido para a simulação tem 11 dígitos. */
 export function isValidCpf(digits: string): boolean {
   return sanitizeCpfInput(digits).length === 11
 }

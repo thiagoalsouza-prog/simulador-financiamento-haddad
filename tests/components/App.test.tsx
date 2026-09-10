@@ -102,6 +102,7 @@ describe('cenário 13 — editar paciente já consultado', () => {
           const body = JSON.parse(init.body as string) as {
             name: string
             phone: string
+            cpf: string
             simulation: unknown
           }
           return Promise.resolve({
@@ -110,6 +111,7 @@ describe('cenário 13 — editar paciente já consultado', () => {
               id: 1,
               nome: body.name,
               telefone: body.phone,
+              cpf: body.cpf || null,
               simulacao: body.simulation,
               criado_em: new Date().toISOString(),
               atualizado_em: new Date().toISOString(),
@@ -123,6 +125,7 @@ describe('cenário 13 — editar paciente já consultado', () => {
               id: 1,
               nome: 'Mariana Silva',
               telefone: '11987654321',
+              cpf: '12345678900',
               simulacao: {
                 tratamentoNome: 'Personalizado',
                 valorTratamento: 14800,
@@ -146,7 +149,7 @@ describe('cenário 13 — editar paciente já consultado', () => {
     vi.unstubAllGlobals()
   })
 
-  it('carrega nome, telefone e simulação ao editar, mas exige CPF de novo antes de recalcular', async () => {
+  it('carrega nome, telefone, CPF e simulação ao editar — recalcula sem precisar redigitar nada', async () => {
     const user = userEvent.setup()
     render(<App />)
 
@@ -156,12 +159,8 @@ describe('cenário 13 — editar paciente já consultado', () => {
 
     expect(await screen.findByLabelText('Nome do paciente')).toHaveValue('Mariana Silva')
     expect(screen.getByLabelText('Telefone')).toHaveValue('(11) 98765-4321')
+    expect(screen.getByLabelText('CPF')).toHaveValue('123.456.789-00')
     expect(screen.getByLabelText('Valor do tratamento')).toHaveValue('14.800,00')
-
-    expect(screen.queryByText(/18×/)).not.toBeInTheDocument()
-    expect(screen.getByText(/Informe um CPF válido com 11 dígitos/i)).toBeInTheDocument()
-
-    await user.type(screen.getByLabelText('CPF'), '12345678900')
 
     expect(await screen.findByText(/18×/)).toBeInTheDocument()
   })

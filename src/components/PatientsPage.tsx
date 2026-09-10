@@ -1,6 +1,7 @@
 import { ArrowLeft, ChevronDown, Pencil, Search } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { searchPatients, type PatientRecord } from '../api/patients'
+import { maskCpf } from '../utils/cpf'
 import { formatCurrency } from '../utils/currency'
 import { formatInstallments, formatPercent } from '../utils/numbers'
 import { maskPhone } from '../utils/phone'
@@ -108,7 +109,9 @@ export function PatientsPage({ onBack, onEdit }: PatientsPageProps) {
                 <div>
                   <p className="font-heading text-sm font-bold text-text">{patient.nome}</p>
                   <p className="text-xs text-muted">
-                    {maskPhone(patient.telefone)} · atualizado em {formatDate(patient.atualizado_em)}
+                    {maskPhone(patient.telefone)}
+                    {patient.cpf ? ` · CPF ${maskCpf(patient.cpf)}` : ''} · atualizado em{' '}
+                    {formatDate(patient.atualizado_em)}
                   </p>
                 </div>
                 <ChevronDown

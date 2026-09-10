@@ -15,6 +15,7 @@ export interface PatientRecord {
   id: number
   nome: string
   telefone: string
+  cpf: string | null
   simulacao: SimulationSnapshot | null
   criado_em: string
   atualizado_em: string
@@ -30,19 +31,20 @@ async function parseErrorMessage(response: Response, fallback: string): Promise<
 }
 
 /**
- * Salva nome, telefone e a simulação atual do paciente no banco de dados.
- * Ação explícita do usuário. Um novo "Salvar paciente" para o mesmo
+ * Salva nome, telefone, CPF e a simulação atual do paciente no banco de
+ * dados. Ação explícita do usuário. Um novo "Salvar paciente" para o mesmo
  * nome+telefone sobrescreve a simulação anterior (mantém só a mais recente).
  */
 export async function savePatient(
   name: string,
   phoneDigits: string,
+  cpfDigits: string,
   simulation: SimulationSnapshot | null,
 ): Promise<PatientRecord> {
   const response = await fetch('/api/patients', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, phone: phoneDigits, simulation }),
+    body: JSON.stringify({ name, phone: phoneDigits, cpf: cpfDigits, simulation }),
   })
 
   if (!response.ok) {

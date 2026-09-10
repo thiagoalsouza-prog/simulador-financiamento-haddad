@@ -121,7 +121,7 @@ function App() {
     setSaveError(undefined)
 
     try {
-      await savePatient(patientName.trim(), patientPhone, simulationSnapshot)
+      await savePatient(patientName.trim(), patientPhone, cpf, simulationSnapshot)
       setSaveStatus('success')
       setSavedIdentity({ name: patientName.trim(), phone: patientPhone })
       setTimeout(() => setSaveStatus('idle'), 2500)
@@ -137,7 +137,7 @@ function App() {
     const handle = setTimeout(() => {
       setSaveStatus('saving')
       setSaveError(undefined)
-      savePatient(patientName.trim(), patientPhone, simulationSnapshot)
+      savePatient(patientName.trim(), patientPhone, cpf, simulationSnapshot)
         .then(() => {
           setSaveStatus('success')
           setTimeout(() => setSaveStatus('idle'), 2000)
@@ -149,7 +149,7 @@ function App() {
     }, AUTOSAVE_DELAY_MS)
 
     return () => clearTimeout(handle)
-  }, [patientSaved, simulationSnapshot, patientName, patientPhone])
+  }, [patientSaved, simulationSnapshot, patientName, patientPhone, cpf])
 
   function handleSelectTreatment(id: string) {
     setTreatmentId(id)
@@ -167,7 +167,7 @@ function App() {
 
     setPatientName(name)
     setPatientPhone(phone)
-    setCpf('')
+    setCpf(patient.cpf ?? '')
     setSavedIdentity({ name, phone })
 
     const sim = patient.simulacao

@@ -161,8 +161,9 @@ export function SimulationForm({
           {patientSaved
             ? 'Paciente salvo. Alterações na simulação são salvas automaticamente a partir de agora.'
             : 'Nome, telefone e CPF são obrigatórios. Clique em "Salvar paciente" para liberar o cálculo da simulação.'}{' '}
-          O CPF nunca é salvo nem aparece na proposta — apenas nome, telefone e a simulação atual são
-          gravados no banco de dados. A busca fica disponível na área gerencial.
+          Nome, telefone, CPF e a simulação atual são gravados no banco de dados — o CPF nunca aparece
+          na proposta enviada ao paciente. Ao editar um paciente já salvo, o CPF volta preenchido
+          automaticamente. A busca fica disponível na área gerencial.
         </p>
       </section>
 

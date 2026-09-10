@@ -14,6 +14,7 @@ describe('PatientsPage', () => {
             id: 1,
             nome: 'Mariana Silva',
             telefone: '11987654321',
+            cpf: '12345678900',
             simulacao: {
               tratamentoNome: 'Protocolo sobre implantes',
               valorTratamento: 14800,
@@ -41,6 +42,7 @@ describe('PatientsPage', () => {
     render(<PatientsPage onBack={() => {}} onEdit={() => {}} />)
 
     expect(await screen.findByText('Mariana Silva')).toBeInTheDocument()
+    expect(screen.getByText(/CPF 123\.456\.789-00/)).toBeInTheDocument()
     expect(screen.queryByText('Protocolo sobre implantes')).not.toBeInTheDocument()
 
     await user.click(screen.getByText('Mariana Silva'))
@@ -68,7 +70,7 @@ describe('PatientsPage', () => {
 
     expect(onEdit).toHaveBeenCalledOnce()
     expect(onEdit).toHaveBeenCalledWith(
-      expect.objectContaining({ nome: 'Mariana Silva', telefone: '11987654321' }),
+      expect.objectContaining({ nome: 'Mariana Silva', telefone: '11987654321', cpf: '12345678900' }),
     )
   })
 })

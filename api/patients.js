@@ -17,6 +17,7 @@ function ensureSchema() {
       `
       await sql`ALTER TABLE pacientes_simulador ADD COLUMN IF NOT EXISTS simulacao JSONB`
       await sql`ALTER TABLE pacientes_simulador ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()`
+      await sql`ALTER TABLE pacientes_simulador ADD COLUMN IF NOT EXISTS cpf TEXT`
       await sql`CREATE INDEX IF NOT EXISTS idx_pacientes_simulador_nome ON pacientes_simulador (lower(nome))`
       await sql`CREATE INDEX IF NOT EXISTS idx_pacientes_simulador_telefone ON pacientes_simulador (telefone)`
       await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_pacientes_simulador_nome_telefone ON pacientes_simulador (lower(nome), telefone)`
@@ -35,7 +36,7 @@ function isValidSimulation(simulation) {
 }
 
 async function handlePost(req, res) {
-  const { name, phone, simulation } = req.body ?? {}
+  const { name, phone, cpf, simulation } = req.body ?? {}
 
   if (typeof name !== 'string' || !name.trim()) {
     res.status(400).json({ error: 'Nome é obrigatório.' })
@@ -47,6 +48,9 @@ async function handlePost(req, res) {
     res.status(400).json({ error: 'Informe um telefone válido, com DDD.' })
     return
   }
+
+  const cpfDigits = typeof cpf === 'string' ? cpf.replace(/\D/g, '') : ''
+  const cpfToStore = cpfDigits.length === 11 ? cpfDigits : null
 
   const simulacao = isValidSimulation(simulation)
     ? JSON.stringify({
@@ -63,11 +67,14 @@ async function handlePost(req, res) {
 
   try {
     const rows = await sql`
-      INSERT INTO pacientes_simulador (nome, telefone, simulacao, atualizado_em)
-      VALUES (${name.trim()}, ${digits}, ${simulacao}::jsonb, now())
+      INSERT INTO pacientes_simulador (nome, telefone, cpf, simulacao, atualizado_em)
+      VALUES (${name.trim()}, ${digits}, ${cpfToStore}, ${simulacao}::jsonb, now())
       ON CONFLICT (lower(nome), telefone)
-      DO UPDATE SET simulacao = EXCLUDED.simulacao, atualizado_em = now()
-      RETURNING id, nome, telefone, simulacao, criado_em, atualizado_em
+      DO UPDATE SET
+        cpf = COALESCE(EXCLUDED.cpf, pacientes_simulador.cpf),
+        simulacao = EXCLUDED.simulacao,
+        atualizado_em = now()
+      RETURNING id, nome, telefone, cpf, simulacao, criado_em, atualizado_em
     `
     res.status(201).json(rows[0])
   } catch (err) {
@@ -83,13 +90,13 @@ async function handleGet(req, res) {
     let rows
     if (!q) {
       rows = await sql`
-        SELECT id, nome, telefone, simulacao, criado_em, atualizado_em FROM pacientes_simulador
+        SELECT id, nome, telefone, cpf, simulacao, criado_em, atualizado_em FROM pacientes_simulador
         ORDER BY atualizado_em DESC LIMIT 50
       `
     } else {
       const digits = q.replace(/\D/g, '')
       rows = await sql`
-        SELECT id, nome, telefone, simulacao, criado_em, atualizado_em FROM pacientes_simulador
+        SELECT id, nome, telefone, cpf, simulacao, criado_em, atualizado_em FROM pacientes_simulador
         WHERE lower(nome) LIKE lower(${'%' + q + '%'})
            OR (${digits} <> '' AND telefone LIKE ${'%' + digits + '%'})
         ORDER BY atualizado_em DESC LIMIT 50

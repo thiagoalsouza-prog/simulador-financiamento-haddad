@@ -5,13 +5,15 @@ PostgreSQL no back-end, hospedada na Vercel) usada pela equipe da Clínica
 Haddad durante negociações de tratamentos odontológicos. Calcula financiamento
 pelo Sistema Price, mostra em qual parcela o custo direto e o valor principal
 são recuperados (sempre em modo gerencial — sem alternância de visão), gera
-propostas comerciais para WhatsApp e permite salvar nome + telefone de
-pacientes para consulta posterior.
+propostas comerciais para WhatsApp e permite salvar nome + telefone + CPF de
+pacientes para consulta e edição posterior.
 
 Não possui login. Tratamentos cadastrados e parâmetros de risco ficam salvos
-em `localStorage` (por navegador); CPF nunca é salvo em lugar nenhum; nome e
-telefone só são gravados no banco de dados quando o usuário clica
-explicitamente em "Salvar paciente".
+em `localStorage` (por navegador); nome, telefone, CPF e a simulação atual só
+são gravados no banco de dados quando o usuário clica explicitamente em
+"Salvar paciente" — depois disso, alterações na simulação são salvas
+automaticamente. O CPF nunca aparece na proposta comercial enviada ao
+paciente.
 
 ## Estrutura do projeto
 
@@ -86,11 +88,12 @@ Configuração necessária no dashboard da Vercel: variável de ambiente
 - A aplicação é pública e não tem login (nem para as informações gerenciais,
   que ficam sempre visíveis). Isso vale também para a busca de pacientes
   salvos, sem senha real.
-- CPF nunca é salvo em lugar nenhum, nunca aparece na proposta e usa
-  `autocomplete="off"`.
-- Nome, telefone e a simulação atual só começam a ser enviados ao banco de
-  dados quando o usuário clica em "Salvar paciente" pela primeira vez; depois
-  disso, alterações na simulação são salvas automaticamente (upsert pelo par
+- CPF é salvo no banco de dados (para não precisar ser redigitado ao editar
+  um paciente já cadastrado), mas nunca aparece na proposta comercial enviada
+  ao paciente e usa `autocomplete="off"`.
+- Nome, telefone, CPF e a simulação atual só começam a ser enviados ao banco
+  de dados quando o usuário clica em "Salvar paciente" pela primeira vez;
+  depois disso, alterações são salvas automaticamente (upsert pelo par
   nome+telefone). Antes do primeiro salvamento, tudo existe apenas em memória
   (estado do React) e some ao recarregar a página.
 - `src/storage/safeStorage.ts` é o único ponto de acesso ao `localStorage` do
