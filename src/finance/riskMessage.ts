@@ -32,6 +32,10 @@ function buildSurgeryReleaseAlert(costRecovery: CostRecoveryResult, directCost: 
     const milestone = isFromDownPaymentAlone ? 'NA ENTRADA' : `NA ${costRecovery.installment}ª PARCELA`
 
     return [
+      isFromDownPaymentAlone
+        ? 'LIBERAÇÃO DA CIRURGIA: JÁ PODE SER LIBERADA'
+        : `LIBERAÇÃO DA CIRURGIA: APÓS O PAGAMENTO DA ${costRecovery.installment}ª PARCELA`,
+      '',
       '🟢 RECUPERAÇÃO DO CUSTO DIRETO',
       '',
       `CUSTO TOTALMENTE RECUPERADO ${milestone}`,
@@ -42,15 +46,13 @@ function buildSurgeryReleaseAlert(costRecovery: CostRecoveryResult, directCost: 
       isFromDownPaymentAlone
         ? '✅ O custo direto do tratamento já está coberto pela entrada e a cirurgia pode ser liberada.'
         : `✅ A partir da ${costRecovery.installment}ª parcela paga, o custo direto do tratamento estará coberto e a cirurgia poderá ser liberada.`,
-      '',
-      isFromDownPaymentAlone
-        ? 'LIBERAÇÃO DA CIRURGIA: JÁ PODE SER LIBERADA'
-        : `LIBERAÇÃO DA CIRURGIA: APÓS O PAGAMENTO DA ${costRecovery.installment}ª PARCELA`,
     ]
   }
 
   const stillMissing = Math.max(0, directCost - costRecovery.receivedAtRecovery)
   return [
+    'LIBERAÇÃO DA CIRURGIA: NÃO LIBERAR SEM AVALIAÇÃO ADICIONAL',
+    '',
     '🔴 RECUPERAÇÃO DO CUSTO DIRETO',
     '',
     'CUSTO NÃO SERÁ TOTALMENTE RECUPERADO NAS PARCELAS PREVISTAS',
@@ -60,8 +62,6 @@ function buildSurgeryReleaseAlert(costRecovery: CostRecoveryResult, directCost: 
     `Ainda faltará: ${formatCurrency(stillMissing)}`,
     '',
     '⚠️ O custo direto do tratamento não será totalmente coberto pelas parcelas previstas.',
-    '',
-    'LIBERAÇÃO DA CIRURGIA: NÃO LIBERAR SEM AVALIAÇÃO ADICIONAL',
   ]
 }
 

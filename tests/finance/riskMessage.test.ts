@@ -51,12 +51,12 @@ describe('buildRiskMessageText', () => {
     const text = buildRiskMessageText(baseInput)
     const lines = text.split('\n')
 
-    expect(lines[0]).toBe('🟢 RECUPERAÇÃO DO CUSTO DIRETO')
+    expect(lines[0]).toBe('LIBERAÇÃO DA CIRURGIA: APÓS O PAGAMENTO DA 5ª PARCELA')
+    expect(text).toContain('🟢 RECUPERAÇÃO DO CUSTO DIRETO')
     expect(text).toContain('CUSTO TOTALMENTE RECUPERADO NA 5ª PARCELA')
     expect(text).toContain(`Entrada + parcelas recebidas: ${formatCurrency(8480.2)}`)
     expect(text).toContain(`Custo direto do tratamento: ${formatCurrency(6000)}`)
     expect(text).toContain('a cirurgia poderá ser liberada')
-    expect(text).toContain('LIBERAÇÃO DA CIRURGIA: APÓS O PAGAMENTO DA 5ª PARCELA')
   })
 
   it('sinaliza liberação imediata quando a entrada sozinha cobre o custo', () => {
@@ -103,9 +103,9 @@ describe('buildRiskMessageText', () => {
     })
     const lines = text.split('\n')
 
-    expect(lines[0]).toBe('🔴 RECUPERAÇÃO DO CUSTO DIRETO')
+    expect(lines[0]).toBe('LIBERAÇÃO DA CIRURGIA: NÃO LIBERAR SEM AVALIAÇÃO ADICIONAL')
+    expect(text).toContain('🔴 RECUPERAÇÃO DO CUSTO DIRETO')
     expect(text).toContain('CUSTO NÃO SERÁ TOTALMENTE RECUPERADO NAS PARCELAS PREVISTAS')
-    expect(text).toContain('LIBERAÇÃO DA CIRURGIA: NÃO LIBERAR SEM AVALIAÇÃO ADICIONAL')
   })
 
   it('funciona sem nome do paciente', () => {
