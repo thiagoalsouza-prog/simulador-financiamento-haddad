@@ -12,7 +12,7 @@ import { SimulationForm } from './components/SimulationForm'
 import { TreatmentsDialog } from './components/TreatmentsDialog'
 import type { Scenario, SimulationMode, SimulationParams } from './finance/types'
 import { runSimulation } from './finance/simulate'
-import { validateSimulationParams } from './finance/validate'
+import { validatePatientInfo, validateSimulationParams } from './finance/validate'
 import { loadRiskSettings, saveRiskSettings } from './storage/riskSettings'
 import { loadTheme, saveTheme, type Theme } from './storage/theme'
 import { loadTreatments, saveTreatments } from './storage/treatments'
@@ -70,7 +70,15 @@ function App() {
     [treatmentValue, directCost, downPayment, monthlyRatePct, mode, installments, maxInstallment],
   )
 
-  const errors = useMemo(() => validateSimulationParams(params), [params])
+  const patientErrors = useMemo(
+    () => validatePatientInfo({ patientName, patientPhone, cpf }),
+    [patientName, patientPhone, cpf],
+  )
+  const simulationErrors = useMemo(() => validateSimulationParams(params), [params])
+  const errors = useMemo(
+    () => ({ ...simulationErrors, ...patientErrors }),
+    [simulationErrors, patientErrors],
+  )
   const canCompute = Object.keys(errors).length === 0
 
   const outcome = useMemo(() => runSimulation(params, riskSettings), [params, riskSettings])

@@ -1,8 +1,45 @@
+import { isValidCpf } from '../utils/cpf'
+import { isValidPhone } from '../utils/phone'
 import type { SimulationParams } from './types'
 
 export type ValidationErrors = Partial<
-  Record<'treatmentValue' | 'directCost' | 'downPayment' | 'monthlyRatePct' | 'installments' | 'maxInstallment', string>
+  Record<
+    | 'treatmentValue'
+    | 'directCost'
+    | 'downPayment'
+    | 'monthlyRatePct'
+    | 'installments'
+    | 'maxInstallment'
+    | 'patientName'
+    | 'patientPhone'
+    | 'cpf',
+    string
+  >
 >
+
+export interface PatientInfo {
+  patientName: string
+  patientPhone: string
+  cpf: string
+}
+
+export function validatePatientInfo(patient: PatientInfo): ValidationErrors {
+  const errors: ValidationErrors = {}
+
+  if (!patient.patientName.trim()) {
+    errors.patientName = 'Informe o nome do paciente.'
+  }
+
+  if (!isValidPhone(patient.patientPhone)) {
+    errors.patientPhone = 'Informe um telefone válido com DDD.'
+  }
+
+  if (!isValidCpf(patient.cpf)) {
+    errors.cpf = 'Informe um CPF válido com 11 dígitos.'
+  }
+
+  return errors
+}
 
 export function validateSimulationParams(params: SimulationParams): ValidationErrors {
   const errors: ValidationErrors = {}

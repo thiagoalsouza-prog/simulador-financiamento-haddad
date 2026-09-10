@@ -29,7 +29,7 @@ export function CommercialResult({
       {!ready ? (
         <p role="status" className="rounded-xl bg-background p-4 text-sm text-muted">
           {outcome.infeasibleMessage ??
-            'Preencha os dados do tratamento para calcular a condição de pagamento.'}
+            'Preencha nome, CPF, telefone do paciente e os dados do tratamento para calcular a condição de pagamento.'}
         </p>
       ) : (
         <>

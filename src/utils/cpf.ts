@@ -13,3 +13,8 @@ export function maskCpf(digits: string): string {
   }
   return result
 }
+
+/** Um CPF válido para a simulação tem 11 dígitos. Nunca é persistido. */
+export function isValidCpf(digits: string): boolean {
+  return sanitizeCpfInput(digits).length === 11
+}

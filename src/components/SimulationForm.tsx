@@ -101,7 +101,7 @@ export function SimulationForm({
           Dados do paciente
         </h2>
 
-        <FormField label="Nome do paciente">
+        <FormField label="Nome do paciente" error={errors.patientName}>
           {({ inputId, describedBy }) => (
             <input
               id={inputId}
@@ -110,13 +110,16 @@ export function SimulationForm({
               placeholder="Ex.: Mariana Silva"
               value={patientName}
               aria-describedby={describedBy}
+              aria-invalid={!!errors.patientName || undefined}
               onChange={(e) => onPatientNameChange(e.target.value)}
-              className="min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary"
+              className={`min-h-11 w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
+                errors.patientName ? 'border-danger' : 'border-border'
+              }`}
             />
           )}
         </FormField>
 
-        <FormField label="Telefone">
+        <FormField label="Telefone" error={errors.patientPhone}>
           {({ inputId, describedBy }) => (
             <input
               id={inputId}
@@ -126,13 +129,16 @@ export function SimulationForm({
               placeholder="(00) 00000-0000"
               value={maskPhone(patientPhone)}
               aria-describedby={describedBy}
+              aria-invalid={!!errors.patientPhone || undefined}
               onChange={(e) => onPatientPhoneChange(sanitizePhoneInput(e.target.value))}
-              className="min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary"
+              className={`min-h-11 w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
+                errors.patientPhone ? 'border-danger' : 'border-border'
+              }`}
             />
           )}
         </FormField>
 
-        <FormField label="CPF (opcional)">
+        <FormField label="CPF" error={errors.cpf}>
           {({ inputId, describedBy }) => (
             <input
               id={inputId}
@@ -142,8 +148,11 @@ export function SimulationForm({
               placeholder="000.000.000-00"
               value={maskCpf(cpf)}
               aria-describedby={describedBy}
+              aria-invalid={!!errors.cpf || undefined}
               onChange={(e) => onCpfChange(sanitizeCpfInput(e.target.value))}
-              className="min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary"
+              className={`min-h-11 w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
+                errors.cpf ? 'border-danger' : 'border-border'
+              }`}
             />
           )}
         </FormField>
@@ -171,10 +180,10 @@ export function SimulationForm({
         )}
 
         <p className="text-xs text-muted">
-          O CPF nunca é salvo nem aparece na proposta. Nome, telefone e a simulação atual só são
-          gravados no banco de dados quando você clica em "Salvar paciente" — um novo salvamento
-          substitui a simulação anterior do mesmo paciente. A busca fica disponível na área
-          gerencial.
+          Nome, telefone e CPF são obrigatórios para calcular a simulação. O CPF nunca é salvo nem
+          aparece na proposta. Nome, telefone e a simulação atual só são gravados no banco de dados
+          quando você clica em "Salvar paciente" — um novo salvamento substitui a simulação anterior
+          do mesmo paciente. A busca fica disponível na área gerencial.
         </p>
       </section>
 
