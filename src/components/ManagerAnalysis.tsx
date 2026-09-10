@@ -1,4 +1,4 @@
-import { AlertCircle, ShieldCheck, ShieldAlert, ShieldQuestion, Users } from 'lucide-react'
+import { AlertCircle, AlertTriangle, ShieldCheck, ShieldAlert, ShieldQuestion, Users } from 'lucide-react'
 import type { SimulationOutcome } from '../finance/types'
 import { formatCurrency } from '../utils/currency'
 import { formatPercent } from '../utils/numbers'
@@ -12,6 +12,7 @@ interface ManagerAnalysisProps {
   directCost: number
   downPayment: number
   onOpenPatients: () => void
+  onOpenRiskMessage: () => void
 }
 
 const RISK_LABEL = {
@@ -26,7 +27,13 @@ const RISK_STYLE = {
   high: { bg: 'bg-[#fbeaea]', text: 'text-danger', border: 'border-danger/30', Icon: ShieldAlert },
 } as const
 
-export function ManagerAnalysis({ outcome, directCost, downPayment, onOpenPatients }: ManagerAnalysisProps) {
+export function ManagerAnalysis({
+  outcome,
+  directCost,
+  downPayment,
+  onOpenPatients,
+  onOpenRiskMessage,
+}: ManagerAnalysisProps) {
   const {
     managerialResult,
     marginPct,
@@ -61,14 +68,24 @@ export function ManagerAnalysis({ outcome, directCost, downPayment, onOpenPatien
           </h2>
           <p className="mt-1 text-xs text-muted">Informações internas — não aparecem na proposta.</p>
         </div>
-        <button
-          type="button"
-          onClick={onOpenPatients}
-          className="flex min-h-9 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
-        >
-          <Users size={14} />
-          Pacientes salvos
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onOpenRiskMessage}
+            className="flex min-h-9 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
+          >
+            <AlertTriangle size={14} />
+            Mensagem de risco
+          </button>
+          <button
+            type="button"
+            onClick={onOpenPatients}
+            className="flex min-h-9 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
+          >
+            <Users size={14} />
+            Pacientes salvos
+          </button>
+        </div>
       </div>
 
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">

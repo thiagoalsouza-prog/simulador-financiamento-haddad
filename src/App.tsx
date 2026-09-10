@@ -5,6 +5,7 @@ import { Header } from './components/Header'
 import { ManagerAnalysis } from './components/ManagerAnalysis'
 import { PatientsPage } from './components/PatientsPage'
 import { ProposalDialog } from './components/ProposalDialog'
+import { RiskMessageDialog } from './components/RiskMessageDialog'
 import { RiskSettingsDialog } from './components/RiskSettingsDialog'
 import { ScenarioComparison } from './components/ScenarioComparison'
 import { SimulationForm } from './components/SimulationForm'
@@ -52,6 +53,7 @@ function App() {
   const [scenarios, setScenarios] = useState<Scenario[]>([])
 
   const [proposalOpen, setProposalOpen] = useState(false)
+  const [riskMessageOpen, setRiskMessageOpen] = useState(false)
   const [treatmentsOpen, setTreatmentsOpen] = useState(false)
   const [riskSettingsOpen, setRiskSettingsOpen] = useState(false)
 
@@ -193,6 +195,7 @@ function App() {
                 directCost={directCost}
                 downPayment={downPayment}
                 onOpenPatients={() => setShowPatientsPage(true)}
+                onOpenRiskMessage={() => setRiskMessageOpen(true)}
               />
             )}
 
@@ -212,6 +215,28 @@ function App() {
         totalReceived={outcome.totalReceived}
         monthlyRatePct={monthlyRatePct}
       />
+
+      {canCompute && outcome.feasible && (
+        <RiskMessageDialog
+          open={riskMessageOpen}
+          onClose={() => setRiskMessageOpen(false)}
+          patientName={patientName}
+          treatmentValue={treatmentValue}
+          downPayment={downPayment}
+          installmentsCount={outcome.installmentsCount}
+          installmentValue={outcome.installmentValue}
+          totalReceived={outcome.totalReceived}
+          monthlyRatePct={monthlyRatePct}
+          directCost={directCost}
+          managerialResult={outcome.managerialResult}
+          marginPct={outcome.marginPct}
+          riskLevel={outcome.risk.level}
+          riskAlerts={outcome.risk.alerts}
+          costRecovery={outcome.costRecovery}
+          principalRecovery={outcome.principalRecovery}
+          principal={outcome.principal}
+        />
+      )}
 
       <TreatmentsDialog
         open={treatmentsOpen}
