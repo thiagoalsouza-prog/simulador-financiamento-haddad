@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronDown, Search } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Pencil, Search } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { searchPatients, type PatientRecord } from '../api/patients'
 import { formatCurrency } from '../utils/currency'
@@ -7,6 +7,7 @@ import { maskPhone } from '../utils/phone'
 
 interface PatientsPageProps {
   onBack: () => void
+  onEdit: (patient: PatientRecord) => void
 }
 
 function formatDate(iso: string): string {
@@ -17,7 +18,7 @@ function formatDate(iso: string): string {
   }
 }
 
-export function PatientsPage({ onBack }: PatientsPageProps) {
+export function PatientsPage({ onBack, onEdit }: PatientsPageProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<PatientRecord[]>([])
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
@@ -162,6 +163,15 @@ export function PatientsPage({ onBack }: PatientsPageProps) {
                   ) : (
                     <p className="text-sm text-muted">Nenhuma simulação salva para este paciente.</p>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => onEdit(patient)}
+                    className="mt-4 flex min-h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition hover:border-primary hover:text-primary"
+                  >
+                    <Pencil size={14} />
+                    Editar paciente
+                  </button>
                 </div>
               )}
             </li>

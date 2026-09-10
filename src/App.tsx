@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { savePatient, type SimulationSnapshot } from './api/patients'
+import { savePatient, type PatientRecord, type SimulationSnapshot } from './api/patients'
 import { CommercialResult } from './components/CommercialResult'
 import { Header } from './components/Header'
 import { ManagerAnalysis } from './components/ManagerAnalysis'
@@ -38,13 +38,14 @@ function App() {
   const [patientName, setPatientName] = useState('')
   const [patientPhone, setPatientPhone] = useState('')
   const [cpf, setCpf] = useState('')
-  const [patientSaved, setPatientSaved] = useState(false)
+  const [savedIdentity, setSavedIdentity] = useState<{ name: string; phone: string } | null>(null)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [saveError, setSaveError] = useState<string | undefined>()
 
-  useEffect(() => {
-    setPatientSaved(false)
-  }, [patientName, patientPhone])
+  const patientSaved =
+    savedIdentity !== null &&
+    savedIdentity.name === patientName.trim() &&
+    savedIdentity.phone === patientPhone
 
   const [treatments, setTreatments] = useState(() => loadTreatments())
   const [riskSettings, setRiskSettings] = useState(() => loadRiskSettings())
@@ -122,7 +123,7 @@ function App() {
     try {
       await savePatient(patientName.trim(), patientPhone, simulationSnapshot)
       setSaveStatus('success')
-      setPatientSaved(true)
+      setSavedIdentity({ name: patientName.trim(), phone: patientPhone })
       setTimeout(() => setSaveStatus('idle'), 2500)
     } catch (err) {
       setSaveStatus('error')
@@ -158,6 +159,30 @@ function App() {
       setTreatmentValue(treatment.price)
       setDirectCost(treatment.cost)
     }
+  }
+
+  function handleEditPatient(patient: PatientRecord) {
+    const name = patient.nome.trim()
+    const phone = patient.telefone
+
+    setPatientName(name)
+    setPatientPhone(phone)
+    setCpf('')
+    setSavedIdentity({ name, phone })
+
+    const sim = patient.simulacao
+    if (sim) {
+      const matchedTreatment = treatments.find((t) => t.name === sim.tratamentoNome)
+      setTreatmentId(matchedTreatment ? matchedTreatment.id : 'custom')
+      setTreatmentValue(sim.valorTratamento)
+      if (matchedTreatment) setDirectCost(matchedTreatment.cost)
+      setDownPayment(sim.entrada)
+      setMonthlyRatePct(sim.jurosMensalPct)
+      setMode('byTerm')
+      setInstallments(sim.parcelas)
+    }
+
+    setShowPatientsPage(false)
   }
 
   function handleChangeTreatments(next: typeof treatments) {
@@ -205,7 +230,7 @@ function App() {
       />
 
       {showPatientsPage ? (
-        <PatientsPage onBack={() => setShowPatientsPage(false)} />
+        <PatientsPage onBack={() => setShowPatientsPage(false)} onEdit={handleEditPatient} />
       ) : (
         <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start">
           <div className="lg:sticky lg:top-24 lg:w-[380px] lg:shrink-0">

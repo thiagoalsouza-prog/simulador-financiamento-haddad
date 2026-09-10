@@ -91,3 +91,78 @@ describe('cenário 11 — app sempre em modo gerencial', () => {
     expect(dialog).toHaveTextContent('Olá, Mariana Silva! Tudo bem?')
   })
 })
+
+describe('cenário 13 — editar paciente já consultado', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((_url: string, init?: RequestInit) => {
+        if (init?.method === 'POST') {
+          const body = JSON.parse(init.body as string) as {
+            name: string
+            phone: string
+            simulation: unknown
+          }
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              id: 1,
+              nome: body.name,
+              telefone: body.phone,
+              simulacao: body.simulation,
+              criado_em: new Date().toISOString(),
+              atualizado_em: new Date().toISOString(),
+            }),
+          })
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => [
+            {
+              id: 1,
+              nome: 'Mariana Silva',
+              telefone: '11987654321',
+              simulacao: {
+                tratamentoNome: 'Personalizado',
+                valorTratamento: 14800,
+                entrada: 2500,
+                jurosMensalPct: 3.5,
+                modo: 'byTerm',
+                parcelas: 18,
+                valorParcela: 932.55,
+                totalReceber: 19285.85,
+              },
+              criado_em: new Date().toISOString(),
+              atualizado_em: new Date().toISOString(),
+            },
+          ],
+        })
+      }),
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('carrega nome, telefone e simulação ao editar, mas exige CPF de novo antes de recalcular', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: /Pesquisar paciente/i }))
+    await user.click(await screen.findByText('Mariana Silva'))
+    await user.click(await screen.findByRole('button', { name: /Editar paciente/i }))
+
+    expect(await screen.findByLabelText('Nome do paciente')).toHaveValue('Mariana Silva')
+    expect(screen.getByLabelText('Telefone')).toHaveValue('(11) 98765-4321')
+    expect(screen.getByLabelText('Valor do tratamento')).toHaveValue('14.800,00')
+
+    expect(screen.queryByText(/18×/)).not.toBeInTheDocument()
+    expect(screen.getByText(/Informe um CPF válido com 11 dígitos/i)).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('CPF'), '12345678900')
+
+    expect(await screen.findByText(/18×/)).toBeInTheDocument()
+  })
+})

@@ -38,7 +38,7 @@ describe('PatientsPage', () => {
 
   it('carrega e mostra os pacientes salvos, expandindo para ver a simulação', async () => {
     const user = userEvent.setup()
-    render(<PatientsPage onBack={() => {}} />)
+    render(<PatientsPage onBack={() => {}} onEdit={() => {}} />)
 
     expect(await screen.findByText('Mariana Silva')).toBeInTheDocument()
     expect(screen.queryByText('Protocolo sobre implantes')).not.toBeInTheDocument()
@@ -52,9 +52,23 @@ describe('PatientsPage', () => {
   it('chama onBack ao clicar em voltar', async () => {
     const user = userEvent.setup()
     const onBack = vi.fn()
-    render(<PatientsPage onBack={onBack} />)
+    render(<PatientsPage onBack={onBack} onEdit={() => {}} />)
 
     await user.click(screen.getByLabelText('Voltar ao simulador'))
     expect(onBack).toHaveBeenCalledOnce()
+  })
+
+  it('chama onEdit com o paciente ao clicar em "Editar paciente"', async () => {
+    const user = userEvent.setup()
+    const onEdit = vi.fn()
+    render(<PatientsPage onBack={() => {}} onEdit={onEdit} />)
+
+    await user.click(await screen.findByText('Mariana Silva'))
+    await user.click(screen.getByRole('button', { name: /Editar paciente/i }))
+
+    expect(onEdit).toHaveBeenCalledOnce()
+    expect(onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ nome: 'Mariana Silva', telefone: '11987654321' }),
+    )
   })
 })
