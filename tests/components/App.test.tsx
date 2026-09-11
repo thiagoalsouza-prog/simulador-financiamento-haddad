@@ -7,7 +7,12 @@ import App from '../../src/App'
 async function fillPatientInfo(user: UserEvent) {
   await user.type(screen.getByLabelText('Nome do paciente'), 'Mariana Silva')
   await user.type(screen.getByLabelText('Telefone'), '11987654321')
-  await user.type(screen.getByLabelText('CPF'), '12345678900')
+  await user.type(screen.getByLabelText('CPF (opcional)'), '12345678900')
+}
+
+async function fillRequiredPatientInfoOnly(user: UserEvent) {
+  await user.type(screen.getByLabelText('Nome do paciente'), 'Mariana Silva')
+  await user.type(screen.getByLabelText('Telefone'), '11987654321')
 }
 
 async function fillAndSavePatient(user: UserEvent) {
@@ -50,12 +55,24 @@ describe('cenário 11 — app sempre em modo gerencial', () => {
     expect(await screen.findByText(/Informações internas/i)).toBeInTheDocument()
   })
 
-  it('não calcula a condição enquanto nome, telefone e CPF do paciente não são informados', () => {
+  it('não calcula a condição enquanto nome e telefone do paciente não são informados', () => {
     render(<App />)
     expect(screen.queryByText(/18×/)).not.toBeInTheDocument()
     expect(
-      screen.getByText(/Preencha nome, CPF, telefone do paciente e os dados do tratamento/i),
+      screen.getByText(/Preencha nome e telefone do paciente e os dados do tratamento/i),
     ).toBeInTheDocument()
+  })
+
+  it('calcula e salva o paciente normalmente sem informar CPF (campo opcional)', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await fillRequiredPatientInfoOnly(user)
+    expect(screen.queryByText(/Informe um CPF válido/i)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Salvar paciente/i }))
+    expect(await screen.findByRole('button', { name: /Paciente salvo/i })).toBeInTheDocument()
+    expect(await screen.findByText(/18×/)).toBeInTheDocument()
   })
 
   it('não calcula a condição só de preencher os dados — exige salvar o paciente primeiro', async () => {
@@ -159,7 +176,7 @@ describe('cenário 13 — editar paciente já consultado', () => {
 
     expect(await screen.findByLabelText('Nome do paciente')).toHaveValue('Mariana Silva')
     expect(screen.getByLabelText('Telefone')).toHaveValue('(11) 98765-4321')
-    expect(screen.getByLabelText('CPF')).toHaveValue('123.456.789-00')
+    expect(screen.getByLabelText('CPF (opcional)')).toHaveValue('123.456.789-00')
     expect(screen.getByLabelText('Valor do tratamento')).toHaveValue('14.800,00')
 
     expect(await screen.findByText(/18×/)).toBeInTheDocument()

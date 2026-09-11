@@ -34,8 +34,8 @@ export function validatePatientInfo(patient: PatientInfo): ValidationErrors {
     errors.patientPhone = 'Informe um telefone válido com DDD.'
   }
 
-  if (!isValidCpf(patient.cpf)) {
-    errors.cpf = 'Informe um CPF válido com 11 dígitos.'
+  if (patient.cpf && !isValidCpf(patient.cpf)) {
+    errors.cpf = 'Informe um CPF válido com 11 dígitos, ou deixe em branco.'
   }
 
   return errors

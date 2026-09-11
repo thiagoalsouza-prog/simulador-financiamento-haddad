@@ -116,7 +116,7 @@ export function SimulationForm({
           )}
         </FormField>
 
-        <FormField label="CPF" error={errors.cpf}>
+        <FormField label="CPF (opcional)" error={errors.cpf}>
           {({ inputId, describedBy }) => (
             <input
               id={inputId}
@@ -160,10 +160,10 @@ export function SimulationForm({
         <p className="text-xs text-muted">
           {patientSaved
             ? 'Paciente salvo. Alterações na simulação são salvas automaticamente a partir de agora.'
-            : 'Nome, telefone e CPF são obrigatórios. Clique em "Salvar paciente" para liberar o cálculo da simulação.'}{' '}
-          Nome, telefone, CPF e a simulação atual são gravados no banco de dados — o CPF nunca aparece
-          na proposta enviada ao paciente. Ao editar um paciente já salvo, o CPF volta preenchido
-          automaticamente. A busca fica disponível na área gerencial.
+            : 'Nome e telefone são obrigatórios. Clique em "Salvar paciente" para liberar o cálculo da simulação.'}{' '}
+          Nome, telefone, CPF (quando informado) e a simulação atual são gravados no banco de dados
+          — o CPF nunca aparece na proposta enviada ao paciente. Ao editar um paciente já salvo, o
+          CPF volta preenchido automaticamente. A busca fica disponível na área gerencial.
         </p>
       </section>
 

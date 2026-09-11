@@ -200,7 +200,7 @@ function App() {
 
   const blockedMessage =
     !treatmentReady || !patientFieldsValid
-      ? 'Preencha nome, CPF, telefone do paciente e os dados do tratamento para calcular a condição de pagamento.'
+      ? 'Preencha nome e telefone do paciente e os dados do tratamento para calcular a condição de pagamento.'
       : !patientSaved
         ? 'Clique em "Salvar paciente" para liberar o cálculo da condição de pagamento.'
         : undefined
