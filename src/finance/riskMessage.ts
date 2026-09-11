@@ -10,6 +10,7 @@ export interface RiskMessageInput {
   installmentValue: number
   totalReceived: number
   monthlyRatePct: number
+  creditCost: number
   directCost: number
   managerialResult: number
   marginPct: number
@@ -125,6 +126,7 @@ export function buildRiskMessageText(input: RiskMessageInput): string {
     `Parcelas: ${input.installmentsCount}x de ${formatCurrency(input.installmentValue)}`,
     `Total a receber: ${formatCurrency(input.totalReceived)}`,
     `Taxa de juros: ${formatPercent(input.monthlyRatePct, 2)} ao mês`,
+    `Ganho com os juros: ${formatCurrency(input.creditCost)}`,
     '',
     `Custo direto: ${formatCurrency(input.directCost)}`,
     `Resultado da operação: ${formatCurrency(input.managerialResult)}`,

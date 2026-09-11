@@ -315,6 +315,7 @@ function App() {
           installmentValue={outcome.installmentValue}
           totalReceived={outcome.totalReceived}
           monthlyRatePct={monthlyRatePct}
+          creditCost={outcome.creditCost}
           directCost={directCost}
           managerialResult={outcome.managerialResult}
           marginPct={outcome.marginPct}

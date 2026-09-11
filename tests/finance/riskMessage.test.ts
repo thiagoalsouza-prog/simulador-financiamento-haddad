@@ -10,6 +10,7 @@ const baseInput: RiskMessageInput = {
   installmentValue: 932.55,
   totalReceived: 19285.85,
   monthlyRatePct: 3.5,
+  creditCost: 4485.85,
   directCost: 6000,
   managerialResult: 13285.85,
   marginPct: 68.9,
@@ -37,6 +38,7 @@ describe('buildRiskMessageText', () => {
     expect(text).toContain('Entrada')
     expect(text).toContain('18x de')
     expect(text).toContain('Taxa de juros')
+    expect(text).toContain(`Ganho com os juros: ${formatCurrency(4485.85)}`)
   })
 
   it('inclui os dados gerenciais que nunca vão para a proposta', () => {
