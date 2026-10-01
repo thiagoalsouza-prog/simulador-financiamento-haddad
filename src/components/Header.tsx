@@ -20,16 +20,11 @@ export function Header({
     <header className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
-          <div
-            aria-hidden="true"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-lg font-bold text-white"
-          >
-            H
+          <div className="aspect-[576/198] h-11 shrink-0 overflow-hidden rounded-xl border border-border bg-white shadow-soft">
+            <img src="/logo-haddad.png" alt="" className="h-full w-full object-cover" />
           </div>
           <div>
-            <h1 className="font-heading text-base font-bold leading-tight text-text sm:text-lg">
-              Clínica Haddad
-            </h1>
+            <h1 className="sr-only">Clínica Haddad</h1>
             <p className="text-xs text-muted">Planejamento financeiro</p>
           </div>
         </div>
