@@ -38,7 +38,7 @@ export function ScenarioComparison({ scenarios, onClear }: ScenarioComparisonPro
         title="Comparação de cenários"
         description={scenarios.length > 1 ? 'As variações são calculadas em relação ao Cenário 1.' : undefined}
         action={
-          <Button variant="ghost" size="sm" onClick={onClear} className="hover:text-danger">
+          <Button variant="ghost-danger" size="sm" onClick={onClear}>
             <Trash2 aria-hidden />
             Limpar comparação
           </Button>

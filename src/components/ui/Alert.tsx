@@ -18,16 +18,22 @@ export function Alert({
   children,
   className,
   role,
+  compact = false,
 }: {
   tone?: AlertTone
   title?: ReactNode
   children?: ReactNode
   className?: string
   role?: 'alert' | 'status'
+  /** versão menor, para avisos dentro de formulários */
+  compact?: boolean
 }) {
   const { box, icon: Icon } = TONES[tone]
   return (
-    <div role={role} className={cx('flex items-start gap-3 rounded-xl border px-4 py-3 text-sm', box, className)}>
+    <div
+      role={role}
+      className={cx('flex items-start gap-3 rounded-xl border', compact ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm', box, className)}
+    >
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
       <div className="min-w-0 flex-1">
         {title && <p className="font-semibold">{title}</p>}

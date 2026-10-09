@@ -73,8 +73,8 @@ function SearchButton({ collapsed, onClick }: { collapsed: boolean; onClick: () 
       aria-label={collapsed ? 'Pesquisar paciente' : undefined}
       title={collapsed ? 'Pesquisar paciente (Ctrl+K)' : undefined}
       className={cx(
-        'flex w-full items-center gap-2 rounded-lg border border-sidebar-border bg-white/[0.03] px-3 py-2 text-left text-sm text-sidebar-foreground/80 transition-colors hover:border-cyan/30 hover:bg-sidebar-accent/60 hover:text-white',
-        collapsed && 'justify-center px-0',
+        'flex w-full items-center gap-2 rounded-lg border border-sidebar-border bg-white/[0.03] py-2 text-left text-sm text-sidebar-foreground/80 transition-colors hover:border-cyan/30 hover:bg-sidebar-accent/60 hover:text-white',
+        collapsed ? 'justify-center' : 'px-3',
       )}
     >
       <Search className="size-4 shrink-0" aria-hidden />
@@ -124,8 +124,8 @@ function NavList({
                     aria-label={collapsed ? item.label : undefined}
                     aria-current={item.active ? 'page' : undefined}
                     className={cx(
-                      'relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150',
-                      collapsed && 'justify-center px-0',
+                      'relative flex w-full items-center gap-3 rounded-lg py-2 text-sm transition-colors duration-150',
+                      collapsed ? 'justify-center' : 'px-3',
                       item.active
                         ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-[inset_0_0_0_1px_rgb(34_211_238/0.12)] before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-[#22d3ee] before:shadow-[0_0_10px_#22d3ee]'
                         : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-white',
@@ -245,8 +245,8 @@ export function AppShell({ groups, theme, onToggleTheme, onSearchPatients, child
             aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
             title={collapsed ? 'Expandir menu' : undefined}
             className={cx(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/60',
-              collapsed && 'justify-center px-0',
+              'flex w-full items-center gap-3 rounded-lg py-2 text-xs text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/60',
+              collapsed ? 'justify-center' : 'px-3',
             )}
           >
             {collapsed ? <ChevronsRight className="size-4" aria-hidden /> : <ChevronsLeft className="size-4" aria-hidden />}

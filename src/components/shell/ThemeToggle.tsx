@@ -21,8 +21,8 @@ export function ThemeToggle({
       aria-label={goingLight ? 'Ativar tema claro' : 'Ativar tema escuro'}
       title={collapsed ? label : undefined}
       className={cx(
-        'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent/70 hover:text-white',
-        collapsed && 'justify-center px-0',
+        'flex w-full items-center gap-3 rounded-lg py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent/70 hover:text-white',
+        collapsed ? 'justify-center' : 'px-3',
       )}
     >
       {goingLight ? <Sun className="size-4 shrink-0" aria-hidden /> : <Moon className="size-4 shrink-0" aria-hidden />}

@@ -80,11 +80,10 @@ export function TreatmentsDialog({ open, onClose, treatments, onChange }: Treatm
                 </div>
               </div>
               <Button
-                variant="ghost"
+                variant="ghost-danger"
                 size="icon-sm"
                 aria-label={`Excluir ${t.name}`}
                 onClick={() => handleRemove(t)}
-                className="hover:text-danger"
               >
                 <Trash2 aria-hidden />
               </Button>

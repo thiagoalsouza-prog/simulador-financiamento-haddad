@@ -1,6 +1,6 @@
 import { cx } from './cx'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'ghost-danger' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm'
 
 const BASE =
@@ -11,6 +11,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   secondary: 'bg-secondary text-secondary-foreground hover:bg-accent',
   outline: 'border-input bg-surface-2/60 text-foreground hover:border-primary/50 hover:bg-accent',
   ghost: 'text-muted-foreground hover:bg-accent hover:text-foreground',
+  'ghost-danger': 'text-muted-foreground hover:bg-danger-soft hover:text-danger',
   danger: 'bg-danger-soft text-danger hover:bg-danger/20',
 }
 

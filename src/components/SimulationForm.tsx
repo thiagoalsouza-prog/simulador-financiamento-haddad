@@ -174,7 +174,7 @@ export function SimulationForm({
           </Button>
 
           {saveStatus === 'error' && saveError && (
-            <Alert tone="danger" role="alert" className="py-2.5 text-xs">
+            <Alert tone="danger" role="alert" compact>
               {saveError}
             </Alert>
           )}
