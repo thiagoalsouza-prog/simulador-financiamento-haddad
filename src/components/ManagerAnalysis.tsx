@@ -1,4 +1,21 @@
-import { AlertCircle, AlertTriangle, ShieldCheck, ShieldAlert, ShieldQuestion, Users } from 'lucide-react'
+import {
+  AlertCircle,
+  AlertTriangle,
+  Banknote,
+  ChevronDown,
+  Gauge,
+  Hourglass,
+  Percent,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldQuestion,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Wallet,
+} from 'lucide-react'
+import { useMemo } from 'react'
 import type { SimulationOutcome } from '../finance/types'
 import { formatCurrency } from '../utils/currency'
 import { formatPercent } from '../utils/numbers'
@@ -6,6 +23,13 @@ import { AmortizationTable } from './AmortizationTable'
 import { RecoveryBanner } from './RecoveryBanner'
 import { RecoveryChart } from './RecoveryChart'
 import { Timeline } from './Timeline'
+import { Alert } from './ui/Alert'
+import { Badge } from './ui/Badge'
+import { Button } from './ui/Button'
+import { Card, CardHeader } from './ui/Card'
+import { StatCard } from './ui/StatCard'
+import type { Tom } from './ui/tones'
+import { cx } from './ui/cx'
 
 interface ManagerAnalysisProps {
   outcome: SimulationOutcome
@@ -22,9 +46,9 @@ const RISK_LABEL = {
 } as const
 
 const RISK_STYLE = {
-  healthy: { bg: 'bg-[#e8f5f1]', text: 'text-success', border: 'border-success/30', Icon: ShieldCheck },
-  moderate: { bg: 'bg-[#faf1de]', text: 'text-warning', border: 'border-warning/30', Icon: ShieldQuestion },
-  high: { bg: 'bg-[#fbeaea]', text: 'text-danger', border: 'border-danger/30', Icon: ShieldAlert },
+  healthy: { box: 'border-success/30 bg-success-soft', text: 'text-success', Icon: ShieldCheck },
+  moderate: { box: 'border-warning/30 bg-warning-soft', text: 'text-warning', Icon: ShieldQuestion },
+  high: { box: 'border-danger/30 bg-danger-soft', text: 'text-danger', Icon: ShieldAlert },
 } as const
 
 export function ManagerAnalysis({
@@ -43,9 +67,22 @@ export function ManagerAnalysis({
     principalRecovery,
     principal,
     installmentsCount,
+    schedule,
   } = outcome
 
-  const resultTone = managerialResult > 0 ? 'success' : managerialResult < 0 ? 'danger' : 'muted'
+  // séries reais: recebido acumulado e resultado (recebido − custo) a cada parcela
+  const { received, result } = useMemo(() => {
+    const receivedSeries = [downPayment]
+    let acc = downPayment
+    for (const row of schedule) {
+      acc += row.payment
+      receivedSeries.push(acc)
+    }
+    return { received: receivedSeries, result: receivedSeries.map((value) => value - directCost) }
+  }, [schedule, downPayment, directCost])
+
+  const resultTone: Tom = managerialResult > 0 ? 'sucesso' : managerialResult < 0 ? 'critico' : 'neutro'
+  const marginTone: Tom = marginPct > 0 ? 'sucesso' : marginPct < 0 ? 'critico' : 'neutro'
   const resultText =
     managerialResult > 0
       ? `Nesse momento, o custo de ${formatCurrency(directCost)} está pago e ${formatCurrency(
@@ -59,122 +96,135 @@ export function ManagerAnalysis({
 
   const riskStyle = RISK_STYLE[risk.level]
 
+  const recoveryValue = !costRecovery.covered
+    ? 'Não alcançada'
+    : costRecovery.installment === 0
+      ? 'Na entrada'
+      : `${costRecovery.installment}ª parcela`
+
   return (
-    <div className="flex flex-col gap-6 rounded-2xl border border-border bg-surface p-5 shadow-soft sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted">
-            Área gerencial
-          </h2>
-          <p className="mt-1 text-xs text-muted">Informações internas — não aparecem na proposta.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onOpenRiskMessage}
-            className="flex min-h-9 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
-          >
-            <AlertTriangle size={14} />
-            Mensagem de risco
-          </button>
-          <button
-            type="button"
-            onClick={onOpenPatients}
-            className="flex min-h-9 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
-          >
-            <Users size={14} />
-            Pacientes salvos
-          </button>
-        </div>
-      </div>
-
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-border p-4">
-          <dt className="text-xs text-muted">Custo direto</dt>
-          <dd className="mt-1 font-heading text-base font-bold text-text">{formatCurrency(directCost)}</dd>
-        </div>
-        <div className="rounded-xl border border-border p-4">
-          <dt className="text-xs text-muted">Parcela de recuperação do custo</dt>
-          <dd className="mt-1 font-heading text-base font-bold text-text">
-            {!costRecovery.covered
-              ? 'Não alcançada'
-              : costRecovery.installment === 0
-                ? 'Na entrada'
-                : `${costRecovery.installment}ª parcela`}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-border p-4">
-          <dt className="text-xs text-muted">Recebido acumulado na recuperação</dt>
-          <dd className="mt-1 font-heading text-base font-bold text-text">
-            {formatCurrency(costRecovery.receivedAtRecovery)}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-border p-4">
-          <dt className="text-xs text-muted">Faltava receber depois da entrada</dt>
-          <dd className="mt-1 font-heading text-base font-bold text-text">
-            {formatCurrency(amountMissingAfterDownPayment)}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-border p-4">
-          <dt className="text-xs text-muted">Resultado da operação</dt>
-          <dd
-            className={`mt-1 font-heading text-base font-bold ${
-              resultTone === 'success' ? 'text-success' : resultTone === 'danger' ? 'text-danger' : 'text-text'
-            }`}
-          >
-            {formatCurrency(managerialResult)}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-border p-4">
-          <dt className="text-xs text-muted">Margem sobre o total recebido</dt>
-          <dd className="mt-1 font-heading text-base font-bold text-text">{formatPercent(marginPct, 1)}</dd>
-        </div>
-      </dl>
-
-      <p className="text-sm text-muted">{resultText}</p>
-
-      <RecoveryBanner
-        recovery={costRecovery}
-        target={directCost}
-        downPayment={downPayment}
-        label="Recuperação do custo"
-        targetNoun="custo"
-        targetNounUpper="CUSTO"
-        notCoveredTitle="ATENÇÃO: OPERAÇÃO EM PREJUÍZO"
-        notCoveredSubtitle="O RECEBIMENTO NÃO COBRE O CUSTO"
+    <Card className="flex flex-col gap-6 p-5 sm:p-6">
+      <CardHeader
+        icon={Gauge}
+        title="Área gerencial"
+        description="Informações internas — não aparecem na proposta."
+        action={
+          <>
+            <Button variant="outline" size="sm" onClick={onOpenRiskMessage}>
+              <AlertTriangle aria-hidden />
+              Mensagem de risco
+            </Button>
+            <Button variant="outline" size="sm" onClick={onOpenPatients}>
+              <Users aria-hidden />
+              Pacientes salvos
+            </Button>
+          </>
+        }
       />
 
-      <RecoveryBanner
-        recovery={principalRecovery}
-        target={principal}
-        downPayment={downPayment}
-        label="Recuperação do valor principal"
-        targetNoun="valor principal"
-        targetNounUpper="VALOR PRINCIPAL"
-        notCoveredTitle="ATENÇÃO: SALDO FINANCIADO NÃO RECUPERADO"
-        notCoveredSubtitle="O RECEBIMENTO NÃO COBRE O VALOR PRINCIPAL"
-      />
-
-      <div>
-        <h3 className="mb-3 font-heading text-sm font-bold text-text">Gráfico de recuperação</h3>
-        <RecoveryChart outcome={outcome} directCost={directCost} downPayment={downPayment} />
+      <div className="stagger grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+        <StatCard
+          rotulo="Custo direto"
+          valor={formatCurrency(directCost)}
+          icone={Wallet}
+          dica="Informação interna. Nunca aparece na proposta."
+        />
+        <StatCard
+          rotulo="Parcela de recuperação do custo"
+          valor={recoveryValue}
+          icone={Target}
+          tom={costRecovery.covered ? 'sucesso' : 'critico'}
+          detalhe={costRecovery.covered && costRecovery.installment ? `de ${installmentsCount} parcelas` : undefined}
+          dica="Primeira parcela em que entrada + parcelas recebidas passam a cobrir o custo direto."
+        />
+        <StatCard
+          rotulo="Recebido acumulado na recuperação"
+          valor={formatCurrency(costRecovery.receivedAtRecovery)}
+          icone={Banknote}
+          tom="primario"
+          serie={received}
+          rotuloSerie="Total recebido, acumulado desde a entrada"
+        />
+        <StatCard
+          rotulo="Faltava receber depois da entrada"
+          valor={formatCurrency(amountMissingAfterDownPayment)}
+          icone={Hourglass}
+          tom={amountMissingAfterDownPayment > 0 ? 'atencao' : 'sucesso'}
+          dica="Parte do custo direto que a entrada não cobre."
+        />
+        <StatCard
+          rotulo="Resultado da operação"
+          valor={formatCurrency(managerialResult)}
+          icone={managerialResult < 0 ? TrendingDown : TrendingUp}
+          tom={resultTone}
+          serie={result}
+          rotuloSerie="Resultado acumulado: recebido menos custo, a cada parcela"
+          dica="Total a receber menos o custo direto."
+        />
+        <StatCard
+          rotulo="Margem sobre o total recebido"
+          valor={formatPercent(marginPct, 1)}
+          icone={Percent}
+          tom={marginTone}
+          dica="Resultado da operação dividido pelo total a receber."
+        />
       </div>
 
-      <div>
-        <h3 className="mb-3 font-heading text-sm font-bold text-text">Linha do tempo</h3>
+      <Alert tone={managerialResult > 0 ? 'success' : managerialResult < 0 ? 'danger' : 'info'}>{resultText}</Alert>
+
+      <div className="flex flex-col gap-4">
+        <RecoveryBanner
+          recovery={costRecovery}
+          target={directCost}
+          downPayment={downPayment}
+          label="Recuperação do custo"
+          targetNoun="custo"
+          targetNounUpper="CUSTO"
+          notCoveredTitle="ATENÇÃO: OPERAÇÃO EM PREJUÍZO"
+          notCoveredSubtitle="O RECEBIMENTO NÃO COBRE O CUSTO"
+        />
+
+        <RecoveryBanner
+          recovery={principalRecovery}
+          target={principal}
+          downPayment={downPayment}
+          label="Recuperação do valor principal"
+          targetNoun="valor principal"
+          targetNounUpper="VALOR PRINCIPAL"
+          notCoveredTitle="ATENÇÃO: SALDO FINANCIADO NÃO RECUPERADO"
+          notCoveredSubtitle="O RECEBIMENTO NÃO COBRE O VALOR PRINCIPAL"
+        />
+      </div>
+
+      <section aria-labelledby="grafico-recuperacao">
+        <h3 id="grafico-recuperacao" className="mb-3 text-sm font-semibold tracking-tight">
+          Gráfico de recuperação
+        </h3>
+        <div className="rounded-xl border border-border bg-surface-2/40 p-3 sm:p-4">
+          <RecoveryChart outcome={outcome} directCost={directCost} downPayment={downPayment} />
+        </div>
+      </section>
+
+      <section aria-labelledby="linha-do-tempo">
+        <h3 id="linha-do-tempo" className="mb-3 text-sm font-semibold tracking-tight">
+          Linha do tempo
+        </h3>
         <Timeline outcome={outcome} downPayment={downPayment} />
-      </div>
+      </section>
 
-      <div className={`rounded-xl border p-4 ${riskStyle.bg} ${riskStyle.border}`}>
-        <div className={`flex items-center gap-2 ${riskStyle.text}`}>
-          <riskStyle.Icon size={18} aria-hidden="true" />
-          <span className="font-heading text-sm font-bold">{RISK_LABEL[risk.level]}</span>
+      <div className={cx('rounded-xl border p-4', riskStyle.box)}>
+        <div className={cx('flex items-center gap-2', riskStyle.text)}>
+          <riskStyle.Icon className="size-[18px]" aria-hidden="true" />
+          <span className="text-sm font-bold">{RISK_LABEL[risk.level]}</span>
+          <Badge tom={risk.level === 'healthy' ? 'sucesso' : risk.level === 'moderate' ? 'atencao' : 'critico'} className="ml-auto">
+            {risk.alerts.length === 0 ? 'Sem alertas' : `${risk.alerts.length} ${risk.alerts.length === 1 ? 'alerta' : 'alertas'}`}
+          </Badge>
         </div>
         {risk.alerts.length > 0 && (
-          <ul className="mt-2 flex flex-col gap-1 text-sm text-text">
+          <ul className="mt-3 flex flex-col gap-1.5 text-sm">
             {risk.alerts.map((alert) => (
               <li key={alert} className="flex items-start gap-2">
-                <AlertCircle size={14} className="mt-0.5 shrink-0 text-muted" aria-hidden="true" />
+                <AlertCircle className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 {alert}
               </li>
             ))}
@@ -182,14 +232,22 @@ export function ManagerAnalysis({
         )}
       </div>
 
-      <details className="rounded-xl border border-border p-4">
-        <summary className="cursor-pointer font-heading text-sm font-bold text-text">
+      <details className="group rounded-xl border border-border bg-surface-2/40">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors hover:bg-accent/60 [&::-webkit-details-marker]:hidden">
           Tabela de amortização completa
+          <ChevronDown
+            className="size-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
+            aria-hidden="true"
+          />
         </summary>
-        <div className="mt-4">
-          <AmortizationTable schedule={outcome.schedule} />
+        <div className="px-4 pb-4">
+          <AmortizationTable
+            schedule={schedule}
+            costRecoveryInstallment={costRecovery.covered ? costRecovery.installment : null}
+            principalRecoveryInstallment={principalRecovery.covered ? principalRecovery.installment : null}
+          />
         </div>
       </details>
-    </div>
+    </Card>
   )
 }

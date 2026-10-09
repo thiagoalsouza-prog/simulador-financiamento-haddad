@@ -1,59 +1,59 @@
 import { X } from 'lucide-react'
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
+import { Portal } from './ui/Portal'
+import { cx } from './ui/cx'
+import { useDialogA11y } from './ui/useDialogA11y'
 
 interface ModalProps {
   open: boolean
   title: string
+  description?: ReactNode
   onClose: () => void
   children: ReactNode
   maxWidthClassName?: string
 }
 
-export function Modal({ open, title, onClose, children, maxWidthClassName = 'max-w-lg' }: ModalProps) {
-  const dialogRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    dialogRef.current?.focus()
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
+/** Diálogo centralizado (folha inferior no celular). Foco preso, Esc fecha, clique no fundo fecha. */
+export function Modal({ open, title, description, onClose, children, maxWidthClassName = 'max-w-lg' }: ModalProps) {
+  const titleId = useId()
+  const dialogRef = useDialogA11y<HTMLDivElement>(open, onClose)
 
   if (!open) return null
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b1a17]/40 p-4"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-        tabIndex={-1}
-        className={`w-full ${maxWidthClassName} max-h-[90vh] overflow-y-auto rounded-2xl bg-surface p-6 shadow-soft_lg`}
-      >
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 id="modal-title" className="font-heading text-lg font-bold text-text">
-            {title}
-          </h2>
-          <button
-            type="button"
-            aria-label="Fechar"
-            onClick={onClose}
-            className="rounded-full p-1.5 text-muted transition hover:bg-background hover:text-text"
-          >
-            <X size={20} />
-          </button>
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+        <div className="absolute inset-0 animate-fade bg-black/60 backdrop-blur-[2px]" onMouseDown={onClose} aria-hidden="true" />
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          tabIndex={-1}
+          className={cx(
+            'relative flex max-h-[92vh] w-full animate-pop flex-col overflow-hidden rounded-t-3xl border border-border bg-popover text-popover-foreground shadow-pop outline-none sm:rounded-2xl',
+            maxWidthClassName,
+          )}
+        >
+          <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
+            <div className="min-w-0">
+              <h2 id={titleId} className="text-base font-semibold tracking-tight">
+                {title}
+              </h2>
+              {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
+            </div>
+            <button
+              type="button"
+              aria-label="Fechar"
+              onClick={onClose}
+              className="-mr-1.5 grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{children}</div>
         </div>
-        {children}
       </div>
-    </div>
+    </Portal>
   )
 }

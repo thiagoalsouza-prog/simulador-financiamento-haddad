@@ -9,5 +9,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/tests/setup.ts'],
+    // os testes de tela digitam campo a campo em jsdom: com vários arquivos em paralelo passam fácil de 5 s
+    testTimeout: 20000,
   },
 })

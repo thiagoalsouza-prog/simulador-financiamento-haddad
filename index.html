@@ -3,13 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo-haddad.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#080d19" />
+    <meta name="color-scheme" content="dark light" />
     <meta name="description" content="Simulador de financiamento odontológico da Clínica Haddad — simulações Price, análise gerencial e propostas comerciais." />
     <meta name="robots" content="noindex, nofollow" />
     <title>Simulador de Financiamento — Clínica Haddad</title>
+    <!-- Marca o tema claro ANTES da 1ª pintura (escuro é o padrão); sem isto a tela pisca. Lê também a chave antiga. -->
+    <script>
+      try {
+        var t = localStorage.getItem('tema')
+        if (t === 'claro' || (t === null && localStorage.getItem('haddad:theme') === 'light')) {
+          document.documentElement.dataset.tema = 'claro'
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f4f6fb')
+        }
+      } catch (e) {}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>

@@ -1,4 +1,6 @@
+import { RefreshCw, TriangleAlert } from 'lucide-react'
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Button } from './ui/Button'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -31,18 +33,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.error) {
       return (
         <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-6 text-center">
-          <h1 className="font-heading text-lg font-bold text-text">Algo deu errado</h1>
-          <p className="max-w-md text-sm text-muted">
+          <span className="grid size-14 place-items-center rounded-2xl bg-danger-soft text-danger">
+            <TriangleAlert className="size-7" aria-hidden />
+          </span>
+          <h1 className="text-xl font-semibold tracking-tight">Algo deu errado</h1>
+          <p className="max-w-md text-sm text-muted-foreground">
             Ocorreu um erro inesperado e esta tela não pôde ser exibida. Nada foi corrompido no
             banco de dados — apenas recarregue a página para continuar.
           </p>
-          <button
-            type="button"
-            onClick={this.handleReload}
-            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-light"
-          >
+          <Button size="lg" onClick={this.handleReload}>
+            <RefreshCw aria-hidden />
             Recarregar página
-          </button>
+          </Button>
         </div>
       )
     }

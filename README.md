@@ -23,17 +23,53 @@ api/
   patients.js       Serverless function (Vercel): POST salva, GET busca pacientes
 src/
   api/              Cliente HTTP para a API de pacientes
-  components/       Componentes visuais (formulário, resultados, diálogos, gráfico)
+  components/       Telas e blocos do simulador (formulário, resultados, gráfico, pacientes, diálogos)
+    shell/          Estrutura padrão Haddad: menu lateral recolhível, barra do celular, tema, Ctrl+K
+    ui/             Kit do design system (Button, Card, StatCard, Badge, Drawer, Toast, Sparkline...)
   finance/          Funções financeiras puras (Price, amortização, recuperação de custo/principal, risco)
   storage/          Persistência local (allowlist de chaves permitidas no localStorage)
-  utils/            Formatação de moeda/percentual e máscaras de CPF/telefone
+  styles/           haddad.css — tokens do design system (cores, raios, sombras, luzes, animações)
+  utils/            Formatação de moeda/percentual, máscaras de CPF/telefone e regras da lista de pacientes
   App.tsx           Composição da tela e estado da simulação
+tailwind.config.js  Liga os tokens do haddad.css às classes do Tailwind (bg-card, text-muted-foreground...)
 tests/
   finance/          Testes das funções financeiras
   storage/          Testes de persistência local
-  components/       Testes de separação de visões e fluxo da proposta
-  utils/            Testes de parsing/formatação e máscaras
+  components/       Testes de telas, menu lateral, kit de componentes e fluxo da proposta
+  utils/            Testes de parsing/formatação, máscaras e regras da lista de pacientes
 ```
+
+## Design system Haddad
+
+A interface segue o design system do ecossistema Haddad (mesmos valores de
+`design-system-haddad` e do Contas a Receber): tema escuro por padrão, tema
+claro opcional, menu lateral recolhível, cartões de indicador com mini
+gráficos, tabelas com filtros/ordenação/paginação e painel lateral de
+detalhes, animações de 150–300 ms e números tabulares.
+
+- **Tokens**: tudo (cores, raios, sombras, luzes, tempos) vive em
+  `src/styles/haddad.css`. Mudou a identidade? Mude só ali. O tema claro é o
+  bloco `:root[data-tema='claro']`; o `index.html` aplica o tema salvo antes da
+  primeira pintura (sem piscar).
+- **Tailwind 3**: o design system original é escrito para Tailwind 4. Aqui o
+  `tailwind.config.js` mantém os mesmos nomes de cor e usa `color-mix` para as
+  classes com transparência (`bg-primary/15`), então os componentes são
+  intercambiáveis entre os sistemas. Não há dependências novas (gráficos em SVG
+  próprio, animações em CSS).
+- **Navegadores**: Chrome/Edge 111+, Safari 16.4+ e Firefox 113+ (as cores com
+  transparência usam `color-mix`; é o mesmo requisito dos outros sistemas
+  Haddad em Tailwind 4).
+- **Só dados reais**: indicadores, variações e mini gráficos recebem números
+  calculados pelo próprio sistema. Sem período anterior não há "variação";
+  sem série não há gráfico.
+- **Janelas e gavetas** (`Modal`, `Drawer`, menu do celular) são desenhadas no
+  `<body>` (`ui/Portal.tsx`). As animações de entrada usam preenchimento
+  `backwards`: com `both`, o elemento fica com uma `transform` permanente e
+  vira o "chão" dos filhos `position: fixed`, empurrando o rodapé dos painéis
+  para fora da tela.
+- **Acessibilidade**: foco preso e devolvido em janelas, `Esc` fecha,
+  `aria-sort` nas tabelas, alvos de 44 px em telas de toque, respeito a
+  `prefers-reduced-motion`.
 
 ## Banco de dados
 
@@ -99,5 +135,7 @@ Configuração necessária no dashboard da Vercel: variável de ambiente
   pelo par nome+telefone). Antes do primeiro salvamento, tudo existe apenas em
   memória (estado do React) e some ao recarregar a página.
 - `src/storage/safeStorage.ts` é o único ponto de acesso ao `localStorage` do
-  navegador e restringe a gravação a duas chaves: tratamentos cadastrados e
-  parâmetros de risco (nada de dados de pacientes passa por aqui).
+  navegador e restringe a gravação a uma lista fechada de chaves: tratamentos
+  cadastrados, parâmetros de risco e preferências de tela (tema, menu
+  recolhido, ordenação e itens por página da lista de pacientes). Nada de dados
+  de pacientes passa por aqui — nem o texto digitado na busca.

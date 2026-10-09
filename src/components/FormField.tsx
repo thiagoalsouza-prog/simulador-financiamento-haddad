@@ -1,3 +1,4 @@
+import { AlertCircle } from 'lucide-react'
 import { type ReactNode, useId } from 'react'
 
 interface FormFieldProps {
@@ -14,18 +15,19 @@ export function FormField({ label, error, hint, children }: FormFieldProps) {
   const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(' ') || undefined
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={inputId} className="text-sm font-medium text-text">
+    <div className="min-w-0">
+      <label htmlFor={inputId} className="field-label">
         {label}
       </label>
       {children({ inputId, describedBy })}
       {hint && (
-        <p id={hintId} className="text-xs text-muted">
+        <p id={hintId} className="mt-1 text-xs text-muted-foreground">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} className="text-xs font-medium text-danger">
+        <p id={errorId} className="mt-1 flex items-start gap-1 text-xs font-medium text-danger">
+          <AlertCircle className="mt-px size-3.5 shrink-0" aria-hidden />
           {error}
         </p>
       )}

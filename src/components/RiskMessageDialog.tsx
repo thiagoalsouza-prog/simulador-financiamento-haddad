@@ -3,6 +3,9 @@ import { useMemo, useState } from 'react'
 import { buildRiskMessageText, type RiskMessageInput } from '../finance/riskMessage'
 import { buildWhatsAppUrl } from '../finance/proposal'
 import { Modal } from './Modal'
+import { Alert } from './ui/Alert'
+import { Button, ButtonLink } from './ui/Button'
+import { useToast } from './ui/useToast'
 
 interface RiskMessageDialogProps extends RiskMessageInput {
   open: boolean
@@ -10,6 +13,7 @@ interface RiskMessageDialogProps extends RiskMessageInput {
 }
 
 export function RiskMessageDialog({ open, onClose, ...input }: RiskMessageDialogProps) {
+  const toast = useToast()
   const [copied, setCopied] = useState(false)
 
   const text = useMemo(() => buildRiskMessageText(input), [input])
@@ -18,42 +22,40 @@ export function RiskMessageDialog({ open, onClose, ...input }: RiskMessageDialog
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
+      toast.push({ tone: 'success', title: 'Mensagem copiada', description: 'Uso interno: não envie ao paciente.' })
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // Clipboard indisponível — usuário pode selecionar o texto manualmente.
+      toast.push({ tone: 'error', title: 'Não foi possível copiar', description: 'Selecione o texto e copie manualmente.' })
     }
   }
 
   return (
-    <Modal open={open} title="Mensagem de risco (uso interno)" onClose={onClose} maxWidthClassName="max-w-xl">
+    <Modal
+      open={open}
+      title="Mensagem de risco (uso interno)"
+      onClose={onClose}
+      maxWidthClassName="max-w-xl"
+    >
       <div className="flex flex-col gap-4">
-        <p className="text-xs font-medium text-danger">
+        <Alert tone="danger">
           Contém dados internos (custo, margem, risco). Nunca envie este texto para o paciente.
-        </p>
+        </Alert>
 
-        <pre className="scrollbar-thin max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-background p-4 font-sans text-sm text-text">
+        <pre className="max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-surface-2/60 p-4 font-sans text-sm leading-relaxed">
           {text}
         </pre>
 
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary hover:text-primary"
-          >
-            {copied ? <Check size={16} className="text-success" /> : <Copy size={16} />}
+          <Button variant="outline" size="lg" onClick={handleCopy}>
+            {copied ? <Check className="text-success" aria-hidden /> : <Copy aria-hidden />}
             {copied ? 'Copiado ✓' : 'Copiar texto'}
-          </button>
+          </Button>
 
-          <a
-            href={buildWhatsAppUrl(text)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-light"
-          >
-            <MessageCircle size={16} />
+          <ButtonLink size="lg" href={buildWhatsAppUrl(text)} target="_blank" rel="noopener noreferrer">
+            <MessageCircle aria-hidden />
             Abrir WhatsApp
-          </a>
+          </ButtonLink>
         </div>
       </div>
     </Modal>

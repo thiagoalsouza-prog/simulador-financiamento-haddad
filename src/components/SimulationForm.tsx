@@ -1,4 +1,5 @@
-import { Check, Loader2, UserPlus } from 'lucide-react'
+import { Check, ChevronDown, Info, Loader2, SlidersHorizontal, Stethoscope, UserPlus, UserRound } from 'lucide-react'
+import { useState } from 'react'
 import type { SimulationMode, Treatment } from '../finance/types'
 import type { ValidationErrors } from '../finance/validate'
 import { maskCpf, sanitizeCpfInput } from '../utils/cpf'
@@ -6,6 +7,11 @@ import { maskPhone, sanitizePhoneInput } from '../utils/phone'
 import { FormField } from './FormField'
 import { MoneyInput } from './MoneyInput'
 import { PercentInput } from './PercentInput'
+import { Alert } from './ui/Alert'
+import { Badge } from './ui/Badge'
+import { Button } from './ui/Button'
+import { Card, CardHeader } from './ui/Card'
+import { SegmentedControl } from './ui/SegmentedControl'
 
 export type SaveStatus = 'idle' | 'saving' | 'success' | 'error'
 
@@ -72,252 +78,262 @@ export function SimulationForm({
   saveError,
   onSavePatient,
 }: SimulationFormProps) {
+  // erros do paciente só aparecem depois que o campo foi visitado ou que se tentou salvar (formulário limpo não nasce vermelho)
+  const [touched, setTouched] = useState({ patientName: false, patientPhone: false, cpf: false })
+  const [attemptedSave, setAttemptedSave] = useState(false)
+  const touch = (field: keyof typeof touched) => setTouched((current) => (current[field] ? current : { ...current, [field]: true }))
+  const patientError = (field: keyof typeof touched) => (touched[field] || attemptedSave ? errors[field] : undefined)
+
   return (
-    <div className="flex flex-col gap-6 rounded-2xl border border-border bg-surface p-5 shadow-soft sm:p-6">
-      <section className="flex flex-col gap-4">
-        <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted">
-          Dados do paciente
-        </h2>
+    <div className="stagger grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-1">
+      <Card className="p-5">
+        <CardHeader
+          icon={UserRound}
+          title="Dados do paciente"
+          action={
+            <Badge tom={patientSaved ? 'sucesso' : 'atencao'} ponto>
+              {patientSaved ? 'Salvo' : 'Pendente'}
+            </Badge>
+          }
+        />
 
-        <FormField label="Nome do paciente" error={errors.patientName}>
-          {({ inputId, describedBy }) => (
-            <input
-              id={inputId}
-              type="text"
-              autoComplete="off"
-              placeholder="Ex.: Mariana Silva"
-              value={patientName}
-              aria-describedby={describedBy}
-              aria-invalid={!!errors.patientName || undefined}
-              onChange={(e) => onPatientNameChange(e.target.value)}
-              className={`min-h-11 w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
-                errors.patientName ? 'border-danger' : 'border-border'
-              }`}
-            />
-          )}
-        </FormField>
-
-        <FormField label="Telefone" error={errors.patientPhone}>
-          {({ inputId, describedBy }) => (
-            <input
-              id={inputId}
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="(00) 00000-0000"
-              value={maskPhone(patientPhone)}
-              aria-describedby={describedBy}
-              aria-invalid={!!errors.patientPhone || undefined}
-              onChange={(e) => onPatientPhoneChange(sanitizePhoneInput(e.target.value))}
-              className={`min-h-11 w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
-                errors.patientPhone ? 'border-danger' : 'border-border'
-              }`}
-            />
-          )}
-        </FormField>
-
-        <FormField label="CPF (opcional)" error={errors.cpf}>
-          {({ inputId, describedBy }) => (
-            <input
-              id={inputId}
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="000.000.000-00"
-              value={maskCpf(cpf)}
-              aria-describedby={describedBy}
-              aria-invalid={!!errors.cpf || undefined}
-              onChange={(e) => onCpfChange(sanitizeCpfInput(e.target.value))}
-              className={`min-h-11 w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
-                errors.cpf ? 'border-danger' : 'border-border'
-              }`}
-            />
-          )}
-        </FormField>
-
-        <button
-          type="button"
-          onClick={onSavePatient}
-          disabled={saveStatus === 'saving'}
-          className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {saveStatus === 'saving' ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : saveStatus === 'success' ? (
-            <Check size={16} className="text-success" />
-          ) : (
-            <UserPlus size={16} />
-          )}
-          {saveStatus === 'success' ? 'Paciente salvo ✓' : 'Salvar paciente'}
-        </button>
-
-        {saveStatus === 'error' && saveError && (
-          <p role="alert" className="text-xs font-medium text-danger">
-            {saveError}
-          </p>
-        )}
-
-        <p className="text-xs text-muted">
-          {patientSaved
-            ? 'Paciente salvo. Alterações na simulação são salvas automaticamente a partir de agora.'
-            : 'Nome e telefone são obrigatórios. Clique em "Salvar paciente" para liberar o cálculo da simulação.'}{' '}
-          Nome, telefone, CPF (quando informado) e a simulação atual são gravados no banco de dados
-          — o CPF nunca aparece na proposta enviada ao paciente. Ao editar um paciente já salvo, o
-          CPF volta preenchido automaticamente. A busca fica disponível na área gerencial.
-        </p>
-      </section>
-
-      <hr className="border-border" />
-
-      <section className="flex flex-col gap-4">
-        <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted">
-          Dados do tratamento
-        </h2>
-
-        <FormField label="Tratamento">
-          {({ inputId, describedBy }) => (
-            <select
-              id={inputId}
-              value={treatmentId}
-              aria-describedby={describedBy}
-              onChange={(e) => onSelectTreatment(e.target.value)}
-              className="min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary"
-            >
-              <option value="custom">Personalizado</option>
-              {treatments.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </FormField>
-
-        <FormField label="Valor do tratamento" error={errors.treatmentValue}>
-          {({ inputId, describedBy }) => (
-            <MoneyInput
-              id={inputId}
-              value={treatmentValue}
-              onChange={onTreatmentValueChange}
-              describedBy={describedBy}
-              invalid={!!errors.treatmentValue}
-            />
-          )}
-        </FormField>
-
-        <FormField
-          label="Custo direto"
-          error={errors.directCost}
-          hint="Informação interna. Nunca aparece na proposta."
-        >
-          {({ inputId, describedBy }) => (
-            <MoneyInput
-              id={inputId}
-              value={directCost}
-              onChange={onDirectCostChange}
-              describedBy={describedBy}
-              invalid={!!errors.directCost}
-            />
-          )}
-        </FormField>
-
-        <FormField label="Entrada" error={errors.downPayment}>
-          {({ inputId, describedBy }) => (
-            <MoneyInput
-              id={inputId}
-              value={downPayment}
-              onChange={onDownPaymentChange}
-              describedBy={describedBy}
-              invalid={!!errors.downPayment}
-            />
-          )}
-        </FormField>
-
-        <FormField label="Juros ao mês" error={errors.monthlyRatePct}>
-          {({ inputId, describedBy }) => (
-            <PercentInput
-              id={inputId}
-              value={monthlyRatePct}
-              onChange={onMonthlyRateChange}
-              describedBy={describedBy}
-              invalid={!!errors.monthlyRatePct}
-            />
-          )}
-        </FormField>
-      </section>
-
-      <hr className="border-border" />
-
-      <section className="flex flex-col gap-4">
-        <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted">
-          Modo de simulação
-        </h2>
-
-        <div
-          role="radiogroup"
-          aria-label="Modo de simulação"
-          className="flex rounded-full border border-border bg-background p-1 text-sm"
-        >
-          <button
-            type="button"
-            role="radio"
-            aria-checked={mode === 'byTerm'}
-            onClick={() => onModeChange('byTerm')}
-            className={`flex-1 rounded-full px-3 py-2 font-medium transition ${
-              mode === 'byTerm' ? 'bg-primary text-white shadow-soft' : 'text-muted hover:text-text'
-            }`}
-          >
-            Por prazo
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={mode === 'byInstallment'}
-            onClick={() => onModeChange('byInstallment')}
-            className={`flex-1 rounded-full px-3 py-2 font-medium transition ${
-              mode === 'byInstallment' ? 'bg-primary text-white shadow-soft' : 'text-muted hover:text-text'
-            }`}
-          >
-            Por parcela
-          </button>
-        </div>
-
-        {mode === 'byTerm' ? (
-          <FormField label="Número de parcelas" error={errors.installments} hint="Entre 1 e 120 parcelas.">
+        <div className="mt-4 flex flex-col gap-3.5">
+          <FormField label="Nome do paciente" error={patientError('patientName')}>
             {({ inputId, describedBy }) => (
               <input
                 id={inputId}
-                type="number"
-                min={1}
-                max={120}
-                step={1}
-                value={installments}
+                type="text"
+                autoComplete="off"
+                placeholder="Ex.: Mariana Silva"
+                value={patientName}
                 aria-describedby={describedBy}
-                aria-invalid={!!errors.installments || undefined}
-                onChange={(e) => onInstallmentsChange(parseInt(e.target.value, 10) || 0)}
-                className={`min-h-11 w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
-                  errors.installments ? 'border-danger' : 'border-border'
-                }`}
+                aria-invalid={!!patientError('patientName') || undefined}
+                onChange={(e) => onPatientNameChange(e.target.value)}
+                onBlur={() => touch('patientName')}
+                className="field"
               />
             )}
           </FormField>
-        ) : (
+
+          <div className="grid grid-cols-1 gap-3.5 min-[420px]:grid-cols-2">
+            <FormField label="Telefone" error={patientError('patientPhone')}>
+              {({ inputId, describedBy }) => (
+                <input
+                  id={inputId}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="(00) 00000-0000"
+                  value={maskPhone(patientPhone)}
+                  aria-describedby={describedBy}
+                  aria-invalid={!!patientError('patientPhone') || undefined}
+                  onChange={(e) => onPatientPhoneChange(sanitizePhoneInput(e.target.value))}
+                  onBlur={() => touch('patientPhone')}
+                  className="field num"
+                />
+              )}
+            </FormField>
+
+            <FormField label="CPF (opcional)" error={patientError('cpf')}>
+              {({ inputId, describedBy }) => (
+                <input
+                  id={inputId}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="000.000.000-00"
+                  value={maskCpf(cpf)}
+                  aria-describedby={describedBy}
+                  aria-invalid={!!patientError('cpf') || undefined}
+                  onChange={(e) => onCpfChange(sanitizeCpfInput(e.target.value))}
+                  onBlur={() => touch('cpf')}
+                  className="field num"
+                />
+              )}
+            </FormField>
+          </div>
+
+          <Button
+            variant={patientSaved && saveStatus !== 'saving' ? 'secondary' : 'outline'}
+            size="lg"
+            onClick={() => {
+              setAttemptedSave(true)
+              onSavePatient()
+            }}
+            disabled={saveStatus === 'saving'}
+            className="w-full"
+          >
+            {saveStatus === 'saving' ? (
+              <Loader2 className="animate-spin" aria-hidden />
+            ) : saveStatus === 'success' ? (
+              <Check className="text-success" aria-hidden />
+            ) : (
+              <UserPlus aria-hidden />
+            )}
+            {saveStatus === 'success' ? 'Paciente salvo ✓' : 'Salvar paciente'}
+          </Button>
+
+          {saveStatus === 'error' && saveError && (
+            <Alert tone="danger" role="alert" className="py-2.5 text-xs">
+              {saveError}
+            </Alert>
+          )}
+
+          <div className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+            <Info className="mt-0.5 size-3.5 shrink-0 text-cyan" aria-hidden />
+            <div className="min-w-0">
+              <p>
+                {patientSaved
+                  ? 'Paciente salvo. Alterações na simulação são salvas automaticamente a partir de agora.'
+                  : 'Nome e telefone são obrigatórios. Clique em "Salvar paciente" para liberar o cálculo da simulação.'}
+              </p>
+              <details className="group mt-1">
+                <summary className="inline-flex cursor-pointer list-none items-center gap-1 font-medium text-foreground/80 transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
+                  Como os dados são guardados
+                  <ChevronDown
+                    className="size-3.5 transition-transform duration-200 group-open:rotate-180"
+                    aria-hidden
+                  />
+                </summary>
+                <p className="mt-1">
+                  Nome, telefone, CPF (quando informado) e a simulação atual são gravados no banco de dados
+                  — o CPF nunca aparece na proposta enviada ao paciente. Ao editar um paciente já salvo, o
+                  CPF volta preenchido automaticamente. A busca fica disponível na área gerencial.
+                </p>
+              </details>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <CardHeader icon={Stethoscope} title="Dados do tratamento" />
+
+        <div className="mt-4 flex flex-col gap-3.5">
+          <FormField label="Tratamento">
+            {({ inputId, describedBy }) => (
+              <select
+                id={inputId}
+                value={treatmentId}
+                aria-describedby={describedBy}
+                onChange={(e) => onSelectTreatment(e.target.value)}
+                className="field"
+              >
+                <option value="custom">Personalizado</option>
+                {treatments.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </FormField>
+
+          <FormField label="Valor do tratamento" error={errors.treatmentValue}>
+            {({ inputId, describedBy }) => (
+              <MoneyInput
+                id={inputId}
+                value={treatmentValue}
+                onChange={onTreatmentValueChange}
+                describedBy={describedBy}
+                invalid={!!errors.treatmentValue}
+              />
+            )}
+          </FormField>
+
           <FormField
-            label="Parcela máxima do paciente"
-            error={errors.maxInstallment ?? infeasibleMessage}
+            label="Custo direto"
+            error={errors.directCost}
+            hint="Informação interna. Nunca aparece na proposta."
           >
             {({ inputId, describedBy }) => (
               <MoneyInput
                 id={inputId}
-                value={maxInstallment}
-                onChange={onMaxInstallmentChange}
+                value={directCost}
+                onChange={onDirectCostChange}
                 describedBy={describedBy}
-                invalid={!!errors.maxInstallment || !!infeasibleMessage}
+                invalid={!!errors.directCost}
               />
             )}
           </FormField>
-        )}
-      </section>
+
+          <div className="grid grid-cols-1 gap-3.5 min-[420px]:grid-cols-2">
+            <FormField label="Entrada" error={errors.downPayment}>
+              {({ inputId, describedBy }) => (
+                <MoneyInput
+                  id={inputId}
+                  value={downPayment}
+                  onChange={onDownPaymentChange}
+                  describedBy={describedBy}
+                  invalid={!!errors.downPayment}
+                />
+              )}
+            </FormField>
+
+            <FormField label="Juros ao mês" error={errors.monthlyRatePct}>
+              {({ inputId, describedBy }) => (
+                <PercentInput
+                  id={inputId}
+                  value={monthlyRatePct}
+                  onChange={onMonthlyRateChange}
+                  describedBy={describedBy}
+                  invalid={!!errors.monthlyRatePct}
+                />
+              )}
+            </FormField>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-5 md:col-span-2 xl:col-span-1">
+        <CardHeader icon={SlidersHorizontal} title="Modo de simulação" />
+
+        <div className="mt-4 flex flex-col gap-3.5">
+          <SegmentedControl
+            ariaLabel="Modo de simulação"
+            value={mode}
+            onChange={onModeChange}
+            options={[
+              { value: 'byTerm', label: 'Por prazo' },
+              { value: 'byInstallment', label: 'Por parcela' },
+            ]}
+          />
+
+          {mode === 'byTerm' ? (
+            <FormField label="Número de parcelas" error={errors.installments} hint="Entre 1 e 120 parcelas.">
+              {({ inputId, describedBy }) => (
+                <input
+                  id={inputId}
+                  type="number"
+                  min={1}
+                  max={120}
+                  step={1}
+                  value={installments}
+                  aria-describedby={describedBy}
+                  aria-invalid={!!errors.installments || undefined}
+                  onChange={(e) => onInstallmentsChange(parseInt(e.target.value, 10) || 0)}
+                  className="field num"
+                />
+              )}
+            </FormField>
+          ) : (
+            <FormField
+              label="Parcela máxima do paciente"
+              error={errors.maxInstallment ?? infeasibleMessage}
+            >
+              {({ inputId, describedBy }) => (
+                <MoneyInput
+                  id={inputId}
+                  value={maxInstallment}
+                  onChange={onMaxInstallmentChange}
+                  describedBy={describedBy}
+                  invalid={!!errors.maxInstallment || !!infeasibleMessage}
+                />
+              )}
+            </FormField>
+          )}
+        </div>
+      </Card>
     </div>
   )
 }

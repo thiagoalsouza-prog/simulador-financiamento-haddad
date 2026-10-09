@@ -22,7 +22,7 @@ export function MoneyInput({ id, value, onChange, describedBy, invalid, placehol
 
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted">
+      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
         R$
       </span>
       <input
@@ -33,9 +33,7 @@ export function MoneyInput({ id, value, onChange, describedBy, invalid, placehol
         placeholder={placeholder}
         aria-describedby={describedBy}
         aria-invalid={invalid || undefined}
-        className={`w-full min-h-11 rounded-xl border bg-surface py-2.5 pl-10 pr-3 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
-          invalid ? 'border-danger' : 'border-border'
-        }`}
+        className="field num pl-10"
         onFocus={() => {
           focused.current = true
         }}

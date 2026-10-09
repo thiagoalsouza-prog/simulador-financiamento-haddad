@@ -33,9 +33,7 @@ export function PercentInput({ id, value, onChange, describedBy, invalid }: Perc
         value={text}
         aria-describedby={describedBy}
         aria-invalid={invalid || undefined}
-        className={`w-full min-h-11 rounded-xl border bg-surface py-2.5 pl-3 pr-9 text-sm text-text shadow-soft outline-none transition focus:border-primary ${
-          invalid ? 'border-danger' : 'border-border'
-        }`}
+        className="field num pr-9"
         onFocus={() => {
           focused.current = true
         }}
@@ -49,7 +47,9 @@ export function PercentInput({ id, value, onChange, describedBy, invalid }: Perc
           setText(formatForEdit(parsed))
         }}
       />
-      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">%</span>
+      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+        %
+      </span>
     </div>
   )
 }

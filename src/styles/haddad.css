@@ -1,0 +1,491 @@
+/*
+ * Design System Haddad — Futuristic Enterprise UI (adaptação para Tailwind 3 / Vite).
+ *
+ * Os VALORES dos tokens abaixo são os mesmos do design-system-haddad (tokens/haddad.css) e do sistema
+ * de referência Contas a Receber — só a "cola" com o Tailwind muda (ver tailwind.config.js).
+ * Este arquivo é a fonte única de cores, raios, sombras, luzes e animações do simulador.
+ *
+ * Escuro é o padrão. Claro é opcional: <html data-tema="claro"> (o script do index.html marca antes da
+ * 1ª pintura, então a tela não pisca). Contraste mínimo de 4,5:1 para texto nos dois temas.
+ */
+
+/* ---------- escuro (padrão) ---------- */
+:root {
+  color-scheme: dark;
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+
+  --background: #080d19;
+  --surface-2: #101827;
+  --surface-3: #1a2639;
+  --foreground: #f8fafc;
+  --card: #151f30;
+  --card-foreground: #f8fafc;
+  --popover: #131c2c;
+  --popover-foreground: #f8fafc;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #1b2740;
+  --secondary-foreground: #f8fafc;
+  --muted: #101827;
+  --muted-foreground: #94a3b8;
+  --accent: #1b2740;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --border: #263449;
+  --input: #2f3f58;
+  --ring: #22d3ee;
+
+  --cyan: #22d3ee;
+  --success: #34d399;
+  --success-soft: rgb(16 185 129 / 0.14);
+  --warning: #fbbf24;
+  --warning-soft: rgb(245 158 11 / 0.14);
+  --danger: #f87171;
+  --danger-soft: rgb(239 68 68 / 0.14);
+  --info: #60a5fa;
+  --info-soft: rgb(59 130 246 / 0.14);
+  --violet: #c4b5fd;
+  --violet-soft: rgb(139 92 246 / 0.16);
+
+  --chart-1: #3b82f6;
+  --chart-2: #22d3ee;
+  --chart-3: #10b981;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+
+  --sidebar: #0b1120;
+  --sidebar-foreground: #cbd5e1;
+  --sidebar-accent: #16213a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 0.06);
+
+  /* profundidade e luz */
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px -16px rgb(0 0 0 / 0.7);
+  --shadow-pop: 0 24px 48px -16px rgb(0 0 0 / 0.75);
+  --glow-primary: 0 0 0 1px rgb(59 130 246 / 0.35), 0 8px 28px -10px rgb(59 130 246 / 0.55);
+  --glow-cyan: 0 0 18px -4px rgb(34 211 238 / 0.65);
+  --card-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.035), transparent 40%);
+  --grid-line: rgb(148 163 184 / 0.045);
+  --top-glow: linear-gradient(90deg, transparent, rgb(34 211 238 / 0.55), transparent);
+
+  /* movimento */
+  --dur-fast: 150ms;
+  --dur: 220ms;
+  --dur-slow: 300ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- claro (opcional) ---------- */
+:root[data-tema='claro'] {
+  color-scheme: light;
+
+  --background: #f4f6fb;
+  --surface-2: #eef2f9;
+  --surface-3: #e2e8f2;
+  --foreground: #0d1526;
+  --card: #ffffff;
+  --card-foreground: #0d1526;
+  --popover: #ffffff;
+  --popover-foreground: #0d1526;
+  --primary: #1d4ed8;
+  --primary-foreground: #ffffff;
+  --secondary: #e7edf8;
+  --secondary-foreground: #0d1526;
+  --muted: #eef2f9;
+  --muted-foreground: #4f5d75;
+  --accent: #e7edf8;
+  --accent-foreground: #0d1526;
+  --destructive: #b91c1c;
+  --border: #dbe2ee;
+  --input: #c7d1e2;
+  --ring: #1d4ed8;
+
+  --cyan: #0e7490;
+  --success: #047857;
+  --success-soft: #dcf5ea;
+  --warning: #a15c07;
+  --warning-soft: #fdf0d5;
+  --danger: #b91c1c;
+  --danger-soft: #fde4e4;
+  --info: #1d4ed8;
+  --info-soft: #e3ecfd;
+  --violet: #6d28d9;
+  --violet-soft: #ede7fe;
+
+  --chart-1: #1d4ed8;
+  --chart-2: #0e7490;
+  --chart-3: #047857;
+  --chart-4: #b45309;
+  --chart-5: #b91c1c;
+
+  /* a barra lateral continua escura no tema claro: é a "assinatura" Haddad */
+  --sidebar: #0d1526;
+  --sidebar-foreground: #cbd5e1;
+  --sidebar-accent: #18233b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 0.08);
+
+  --shadow-card: 0 1px 2px rgb(13 21 38 / 0.06), 0 8px 24px -16px rgb(13 21 38 / 0.25);
+  --shadow-pop: 0 24px 48px -20px rgb(13 21 38 / 0.35);
+  --glow-primary: 0 0 0 1px rgb(29 78 216 / 0.25), 0 14px 30px -16px rgb(29 78 216 / 0.35);
+  --glow-cyan: 0 0 14px -4px rgb(14 116 144 / 0.45);
+  --card-sheen: none;
+  --grid-line: transparent;
+  --top-glow: linear-gradient(90deg, transparent, rgb(29 78 216 / 0.35), transparent);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* luz azul/ciano no topo + grade técnica bem sutil (só no escuro) — camada fixa, não repinta ao rolar */
+  :root:not([data-tema='claro']) body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(1100px 520px at 12% -12%, rgb(59 130 246 / 0.13), transparent 60%),
+      radial-gradient(800px 420px at 100% -5%, rgb(34 211 238 / 0.07), transparent 60%),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: auto, auto, 48px 48px, 48px 48px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    letter-spacing: -0.015em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgb(59 130 246 / 0.35);
+  }
+
+  input,
+  select,
+  textarea {
+    color-scheme: inherit;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+@layer components {
+  /* cartão padrão: superfície + brilho superior + sombra profunda */
+  .card-surface {
+    background: var(--card-sheen), var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* fio luminoso no topo de um cartão em destaque */
+  .brilho-topo {
+    position: relative;
+  }
+  .brilho-topo::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: var(--top-glow);
+    pointer-events: none;
+  }
+
+  /* cartão interativo */
+  .card-interactive {
+    transition:
+      transform var(--dur) var(--ease-out),
+      border-color var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+    box-shadow: var(--shadow-card), var(--glow-primary);
+  }
+
+  /* vidro: barras fixas */
+  .glass {
+    background: color-mix(in oklab, var(--background) 78%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
+
+  /* campos de formulário iguais em todas as telas */
+  .field {
+    display: block;
+    height: 2.25rem;
+    width: 100%;
+    min-width: 0;
+    border-radius: 0.625rem;
+    border: 1px solid var(--input);
+    background: var(--surface-2);
+    color: var(--foreground);
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    outline: none;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+  .field::placeholder {
+    color: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+  }
+  .field:hover {
+    border-color: color-mix(in oklab, var(--primary) 30%, var(--input));
+  }
+  .field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 24%, transparent);
+  }
+  .field[aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+  .field[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--danger) 24%, transparent);
+  }
+  .field:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  select.field {
+    padding-right: 2rem;
+  }
+  /* telas de toque: alvo de 44 px e fonte de 16 px (evita o zoom automático do iOS) */
+  @media (pointer: coarse) {
+    .field {
+      height: 2.75rem;
+      font-size: 1rem;
+    }
+  }
+
+  .field-label {
+    margin-bottom: 0.25rem;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+
+  /* rótulo de seção (maiúsculas pequenas) */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  /* tabelas: cabeçalho fixo, hover discreto, linha selecionada */
+  .data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-2);
+    box-shadow: inset 0 -1px 0 var(--border);
+  }
+  .data-table tbody tr {
+    transition: background-color var(--dur-fast) var(--ease-out);
+  }
+  .data-table tbody tr:hover {
+    background: color-mix(in oklab, var(--primary) 6%, transparent);
+  }
+  .data-table tbody tr[data-selected='true'] {
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+  }
+
+  /* esqueleto de carregamento */
+  .skeleton {
+    background: linear-gradient(90deg, var(--muted) 0%, var(--secondary) 50%, var(--muted) 100%);
+    background-size: 200% 100%;
+    animation: haddad-shimmer 1.4s ease-in-out infinite;
+    border-radius: 0.5rem;
+  }
+}
+
+@layer utilities {
+  /* números financeiros: largura fixa para alinhar colunas */
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* entrada suave (página, cartões); `stagger` escalona os filhos */
+  .enter {
+    animation: haddad-enter var(--dur-slow) var(--ease-out) backwards;
+  }
+  .stagger > * {
+    animation: haddad-enter var(--dur-slow) var(--ease-out) backwards;
+  }
+  .stagger > *:nth-child(2) {
+    animation-delay: 30ms;
+  }
+  .stagger > *:nth-child(3) {
+    animation-delay: 60ms;
+  }
+  .stagger > *:nth-child(4) {
+    animation-delay: 90ms;
+  }
+  .stagger > *:nth-child(5) {
+    animation-delay: 120ms;
+  }
+  .stagger > *:nth-child(6) {
+    animation-delay: 150ms;
+  }
+  .stagger > *:nth-child(7) {
+    animation-delay: 180ms;
+  }
+  .stagger > *:nth-child(n + 8) {
+    animation-delay: 210ms;
+  }
+
+  /* valor que acabou de aparecer ou mudar */
+  .value-in {
+    animation: haddad-value var(--dur-slow) var(--ease-out) backwards;
+  }
+
+  /* linha de gráfico que se desenha uma vez, ao aparecer (requer pathLength="1" no traço) */
+  .draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: haddad-draw 900ms var(--ease-out) 80ms forwards;
+  }
+}
+
+@keyframes haddad-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes haddad-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes haddad-value {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes haddad-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes haddad-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes haddad-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes haddad-slide-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes haddad-slide-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes haddad-toast {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body::before {
+    display: none !important;
+  }
+}
