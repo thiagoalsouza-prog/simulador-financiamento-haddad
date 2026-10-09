@@ -83,12 +83,12 @@ export function ProposalDialog({
         </pre>
 
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" size="lg" onClick={handleCopy}>
+          <Button variant="outline" size="lg" onClick={handleCopy} className="flex-1 sm:flex-none">
             {copied ? <Check className="text-success" aria-hidden /> : <Copy aria-hidden />}
             {copied ? 'Copiado ✓' : 'Copiar texto'}
           </Button>
 
-          <ButtonLink size="lg" href={buildWhatsAppUrl(text)} target="_blank" rel="noopener noreferrer">
+          <ButtonLink size="lg" href={buildWhatsAppUrl(text)} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none">
             <MessageCircle aria-hidden />
             Abrir WhatsApp
           </ButtonLink>
